@@ -6,5 +6,7 @@ obj/
 .vs/
 *.user
 
+.vscode/
+
 # Secrets
 appsettings.Development.json
