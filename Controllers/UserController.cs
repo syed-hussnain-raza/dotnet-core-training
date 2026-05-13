@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc; // Provides API controller features like routing, HTTP responses
 using MyAssignment.Models;      // Imports User model from Models folder
+using MyAssignment.Helper;
 
 namespace MyAssignment.Controllers
 {
@@ -22,7 +23,7 @@ namespace MyAssignment.Controllers
     [HttpGet]
     public IActionResult GetAllUsers()
     {
-      return Ok(_users);
+      return Ok(ApiResponse<List<User>>.SuccessResponse("Fetching all users", _users));
     }
 
     // Get user by id
@@ -32,11 +33,9 @@ namespace MyAssignment.Controllers
       var user = FindUser(id);
 
       if (user == null)
-      {
-        return NotFound("User not found");
-      }
+        return NotFound(ApiResponse<User>.FailResponse("User not found"));
 
-      return Ok(user);
+      return Ok(ApiResponse<User>.SuccessResponse("User fetched successfully", user));
     }
 
     // Add a new user
@@ -45,7 +44,7 @@ namespace MyAssignment.Controllers
     {
       // validate incoming data
       if (!IsValidUser(user))
-          return BadRequest("FullName, Email and PhoneNumber are required");
+          return BadRequest(ApiResponse<User>.FailResponse("FullName, Email and PhoneNumber are required"));
       
       // auto generate id
       user.Id = GenerateId();
@@ -54,7 +53,7 @@ namespace MyAssignment.Controllers
       _users.Add(user);
 
       // return 201 with created user data
-      return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
+      return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, ApiResponse<User>.SuccessResponse("Created user successfully", user));
     }
 
     // delete existing user
@@ -67,13 +66,13 @@ namespace MyAssignment.Controllers
       // if user not exits
       if (user == null)
       {
-        return NotFound("User not found");
+        return NotFound(ApiResponse<User>.FailResponse("User not found"));
       }
 
       // delete logic    
       _users.Remove(user);
 
-      return NoContent();
+      return Ok(ApiResponse<object>.SuccessResponse("Delete successfully", default));
     }
 
     // update a user
@@ -84,12 +83,12 @@ namespace MyAssignment.Controllers
 
       if (user == null)
       {
-        return NotFound("User not found for update");
+        return NotFound(ApiResponse<User>.FailResponse("User not found for update"));
       }
 
       // validate incoming data
       if (!IsValidUser(updatedUser))
-          return BadRequest("FullName, Email and PhoneNumber are required");
+          return BadRequest(ApiResponse<User>.FailResponse("FullName, Email and PhoneNumber are required"));
 
       // replace properties
       user.FullName       = updatedUser.FullName;
@@ -98,7 +97,7 @@ namespace MyAssignment.Controllers
       user.MembershipType = updatedUser.MembershipType;
       user.IsActive       = updatedUser.IsActive;
 
-      return NoContent();
+      return Ok(ApiResponse<User>.SuccessResponse("Data Updated Successfully", user));
     }
 
     // Private Helper Methods
