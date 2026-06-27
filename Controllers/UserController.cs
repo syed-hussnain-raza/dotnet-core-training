@@ -2,11 +2,13 @@ using Microsoft.AspNetCore.Mvc;
 using MyAssignment.Helper;
 using MyAssignment.Models;
 using MyAssignment.Services;
+using Asp.Versioning;
 
 namespace MyAssignment.Controllers
 {
     [ApiController]
-    [Route("api/users")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/users")] // dynamic version in route
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
