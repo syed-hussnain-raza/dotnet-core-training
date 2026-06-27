@@ -1,4 +1,5 @@
 using MyAssignment.Helper;
+using MyAssignment.Services;
 
 // Create the builder
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,9 @@ builder.Services.AddSwaggerGen();
 // AutoMapper registration for mapping between models and DTOs
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
+// register the IUserService interface and its implementation UserService for dependency injection
+builder.Services.AddScoped<IUserService, UserService>();
+
 
 //  finalize registeration and build the runnable app
 var app = builder.Build();
@@ -20,7 +24,7 @@ var app = builder.Build();
 app.UseSwagger(); // enable swagger middleware
 app.UseSwaggerUI(); // enable swagger UI middleware
 
-// 
+// enable routing middleware to route incoming requests to the appropriate controller actions
 app.MapControllers();
 
 //  start web server and listen for incoming requests
