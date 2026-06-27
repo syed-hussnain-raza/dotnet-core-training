@@ -1,3 +1,5 @@
+using MyAssignment.Helper;
+
 // Create the builder
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +9,10 @@ builder.Services.AddControllers();
 // register services for swagger to generate API documentation
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// AutoMapper registration for mapping between models and DTOs
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+
 
 //  finalize registeration and build the runnable app
 var app = builder.Build();

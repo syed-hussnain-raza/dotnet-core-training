@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc; // Provides API controller features like routing, HTTP responses
 using MyAssignment.Models;      // Imports User model from Models folder
 using MyAssignment.Helper;
@@ -10,7 +11,14 @@ namespace MyAssignment.Controllers
   // Controller class handling all user-related API requests
   public class UserController: ControllerBase
   {
-    // memory as a database
+    private readonly IMapper _mapper; // AutoMapper instance for mapping between models and DTOs memory as a database
+
+    // Constructor to inject AutoMapper dependency
+    public UserController(IMapper mapper)
+    {
+        _mapper = mapper;
+    }
+
     private static List<User> _users = new List<User>
     {
         new User(1, "Hussnain", "hussnain@gmail.com", "03001234567", "Premium", true),
@@ -40,14 +48,16 @@ namespace MyAssignment.Controllers
 
     // Add a new user
     [HttpPost]
-    public IActionResult CreateUser(User user)
+    public IActionResult CreateUser(UserDto dto)
     {
       // validate incoming data
-      if (!IsValidUser(user))
+      if (!IsValidDto(dto))
           return BadRequest(ApiResponse<User>.FailResponse("FullName, Email and PhoneNumber are required"));
       
-      // auto generate id
+      // Map UserDto → User
+      var user = _mapper.Map<User>(dto);
       user.Id = GenerateId();
+      user.IsActive = true;
 
       // add to list
       _users.Add(user);
@@ -77,7 +87,7 @@ namespace MyAssignment.Controllers
 
     // update a user
     [HttpPut("{id}")]
-    public IActionResult UpdateUser(int id, User updatedUser)
+    public IActionResult UpdateUser(int id, UserDto dto)
     {
       var user = FindUser(id);
 
@@ -87,15 +97,11 @@ namespace MyAssignment.Controllers
       }
 
       // validate incoming data
-      if (!IsValidUser(updatedUser))
+      if (!IsValidDto(dto))
           return BadRequest(ApiResponse<User>.FailResponse("FullName, Email and PhoneNumber are required"));
 
-      // replace properties
-      user.FullName       = updatedUser.FullName;
-      user.Email          = updatedUser.Email;
-      user.PhoneNumber    = updatedUser.PhoneNumber;
-      user.MembershipType = updatedUser.MembershipType;
-      user.IsActive       = updatedUser.IsActive;
+      // Map UserDto properties onto existing User object
+      _mapper.Map(dto, user);
 
       return Ok(ApiResponse<User>.SuccessResponse("Data Updated Successfully", user));
     }
@@ -108,12 +114,12 @@ namespace MyAssignment.Controllers
       return _users.FirstOrDefault(u => u.Id == id);
     }
 
-    // validate user
-    private bool IsValidUser(User user)
+    // Validate DTO
+    private bool IsValidDto(UserDto dto)
     {
-      return !string.IsNullOrEmpty(user.FullName) && 
-             !string.IsNullOrEmpty(user.Email) && 
-             !string.IsNullOrEmpty(user.PhoneNumber);
+        return !string.IsNullOrEmpty(dto.FullName) &&
+                !string.IsNullOrEmpty(dto.Email) &&
+                !string.IsNullOrEmpty(dto.PhoneNumber);
     }
 
     // generate id
