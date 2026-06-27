@@ -4,8 +4,15 @@ var builder = WebApplication.CreateBuilder(args);
 // register controllers so app look for controller class
 builder.Services.AddControllers();
 
+// register services for swagger to generate API documentation
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 //  finalize registeration and build the runnable app
 var app = builder.Build();
+
+app.UseSwagger(); // enable swagger middleware
+app.UseSwaggerUI(); // enable swagger UI middleware
 
 // 
 app.MapControllers();
