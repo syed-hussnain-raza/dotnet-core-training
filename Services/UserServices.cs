@@ -16,21 +16,25 @@ namespace MyAssignment.Services
           new User(4, "Sara",     "sara@gmail.com",      "03009876543", "Premium", false)
         };
 
+        // Constructor to inject IMapper
         public UserService(IMapper mapper)
         {
             _mapper = mapper;
         }
 
+        // Get all users
         public List<User> GetAllUsers()
         {
             return _users;
         }
 
+        // Get a user by ID
         public User? GetUserById(int id)
         {
             return _users.FirstOrDefault(u => u.Id == id);
         }
 
+        // Create a new user
         public User CreateUser(UserDto dto)
         {
             var user = _mapper.Map<User>(dto);
@@ -40,6 +44,7 @@ namespace MyAssignment.Services
             return user;
         }
 
+        // Update a user by ID
         public User? UpdateUser(int id, UserDto dto)
         {
             var user = _users.FirstOrDefault(u => u.Id == id);
@@ -50,6 +55,7 @@ namespace MyAssignment.Services
             return user;
         }
 
+        // Delete a user by ID
         public bool DeleteUser(int id)
         {
             var user = _users.FirstOrDefault(u => u.Id == id);

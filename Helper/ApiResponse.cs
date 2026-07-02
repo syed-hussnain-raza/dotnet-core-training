@@ -12,7 +12,7 @@ namespace MyAssignment.Helper
     public T? Data {get; set;}
 
     // constructor
-    public  ApiResponse (bool success, string message, T? data)
+    public ApiResponse (bool success, string message, T? data)
     {
       Success = success;
       Message = message;

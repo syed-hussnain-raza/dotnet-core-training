@@ -21,8 +21,6 @@ builder.Services.AddScoped<IUserService, UserService>();
 // API Versioning configuration
 builder.Services.AddApiVersioning(options =>
 {
-    options.DefaultApiVersion = new ApiVersion(1, 0); // default is v1.0
-    options.AssumeDefaultVersionWhenUnspecified = true; // if no version sent, use default
     options.ReportApiVersions = true; // tells client which versions are available in response headers
 }).AddMvc();
 

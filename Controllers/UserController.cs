@@ -13,7 +13,7 @@ namespace MyAssignment.Controllers
     {
         private readonly IUserService _userService;
 
-        // Inject IUserService via constructor - no more IMapper needed here
+        // Inject IUserService via constructor
         public UserController(IUserService userService)
         {
             _userService = userService;
@@ -43,9 +43,7 @@ namespace MyAssignment.Controllers
         [HttpPost]
         public IActionResult CreateUser(UserDto dto)
         {
-            if (string.IsNullOrEmpty(dto.FullName) ||
-                string.IsNullOrEmpty(dto.Email) ||
-                string.IsNullOrEmpty(dto.PhoneNumber))
+            if (!dto.IsValid())
                 return BadRequest(ApiResponse<User>.FailResponse("FullName, Email and PhoneNumber are required"));
 
             var user = _userService.CreateUser(dto);
@@ -56,9 +54,8 @@ namespace MyAssignment.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteUser(int id)
         {
-            var deleted = _userService.DeleteUser(id);
-
-            if (!deleted)
+            // Call the service to delete the user
+            if (!_userService.DeleteUser(id))
                 return NotFound(ApiResponse<User>.FailResponse("User not found"));
 
             return Ok(ApiResponse<object>.SuccessResponse("Deleted successfully", default));
@@ -68,9 +65,7 @@ namespace MyAssignment.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateUser(int id, UserDto dto)
         {
-            if (string.IsNullOrEmpty(dto.FullName) ||
-                string.IsNullOrEmpty(dto.Email) ||
-                string.IsNullOrEmpty(dto.PhoneNumber))
+            if (!dto.IsValid())
                 return BadRequest(ApiResponse<User>.FailResponse("FullName, Email and PhoneNumber are required"));
 
             var user = _userService.UpdateUser(id, dto);
