@@ -3,10 +3,9 @@ namespace MyAssignment.Constants
     /// <summary>
     /// Centralized collection of response messages used across the User API.
     /// </summary>
-    public static class UserMessages
+    public static class MessagesConstants
     {
         public const string UserNotFound = "User not found.";
-        public const string ValidationFailed = "FullName, Email and PhoneNumber are required.";
         public const string InvalidEmailFormat = "Email format is invalid.";
         public const string InvalidPhoneFormat = "Phone number format is invalid.";
         public const string InvalidMembershipType = "MembershipType must be either 'Basic' or 'Premium'.";
