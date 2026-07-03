@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using MyAssignment.Constants;
 
 namespace MyAssignment.Models
 {
@@ -10,7 +11,6 @@ namespace MyAssignment.Models
         /// <summary>
         /// Unique identifier of the user. Server-generated.
         /// </summary>
-        [Required]
         public int Id { get; set; }
 
         /// <summary>
@@ -23,23 +23,26 @@ namespace MyAssignment.Models
         /// Email address of the user.
         /// </summary>
         [Required]
+        [EmailAddress(ErrorMessage = MessagesConstants.InvalidEmailFormat)]
         public string Email { get; set; } = string.Empty;
 
         /// <summary>
         /// Contact phone number of the user.
         /// </summary>
         [Required]
+        [RegularExpression(@"^03\d{9}$", ErrorMessage = MessagesConstants.InvalidPhoneFormat)]
         public string PhoneNumber { get; set; } = string.Empty;
 
         /// <summary>
         /// Membership tier of the user. Expected values: "Basic" or "Premium".
         /// </summary>
+        [Required]
+        [RegularExpression(@"^(Basic|Premium)$", ErrorMessage = MessagesConstants.InvalidMembershipType)]
         public string MembershipType { get; set; } = "Basic";
 
         /// <summary>
         /// Indicates whether the user's account is active.
         /// </summary>
-        [Required]
         public bool IsActive { get; set; } = true;
 
         /// <summary>
