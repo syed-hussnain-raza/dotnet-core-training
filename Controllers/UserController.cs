@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;       // Provides API controller features like routing, HTTP responses
 using MyAssignment.Models;            // Imports User model from Models folder
 using MyAssignment.Constants;         // Imports centralized response messages
-using System.Text.RegularExpressions; // Used for email/phone format validation
 
 namespace MyAssignment.Controllers
 {
@@ -9,9 +8,12 @@ namespace MyAssignment.Controllers
     /// Handles all user-related API requests: create, read, update, and delete.
     /// </summary>
     [ApiController]          // Enables API-specific behavior like automatic validation and binding
-    [Route("api/users")]     // Base URL for all endpoints in this controller
+    [Route(ApiPrefix)]       // Base URL for all endpoints in this controller
     public class UserController : ControllerBase
     {
+        // Base route for all user-related endpoints
+        private const string ApiPrefix = "api/users";
+
         // In-memory list acting as a database
         private static List<User> _users = new List<User>
         {
@@ -35,7 +37,7 @@ namespace MyAssignment.Controllers
             }
             catch (Exception)
             {
-                return BadRequest(UserMessages.UnexpectedError);
+                return BadRequest(MessagesConstants.UnexpectedError);
             }
         }
 
@@ -53,14 +55,14 @@ namespace MyAssignment.Controllers
 
                 if (user == null)
                 {
-                    return BadRequest(UserMessages.UserNotFound);
+                    return BadRequest(MessagesConstants.UserNotFound);
                 }
 
                 return Ok(user);
             }
             catch (Exception)
             {
-                return BadRequest(UserMessages.UnexpectedError);
+                return BadRequest(MessagesConstants.UnexpectedError);
             }
         }
 
@@ -74,14 +76,6 @@ namespace MyAssignment.Controllers
         {
             try
             {
-                // Validate the incoming user data
-                string? validationError = ValidateUser(user);
-
-                if (validationError != null)
-                {
-                    return BadRequest(validationError);
-                }
-
                 user.Id = GenerateId();
                 _users.Add(user);
 
@@ -89,7 +83,7 @@ namespace MyAssignment.Controllers
             }
             catch (Exception)
             {
-                return BadRequest(UserMessages.UnexpectedError);
+                return BadRequest(MessagesConstants.UnexpectedError);
             }
         }
 
@@ -107,16 +101,16 @@ namespace MyAssignment.Controllers
 
                 if (user == null)
                 {
-                    return BadRequest(UserMessages.UserNotFound);
+                    return BadRequest(MessagesConstants.UserNotFound);
                 }
 
                 _users.Remove(user);
 
-                return Ok(UserMessages.UserDeleted);
+                return Ok(MessagesConstants.UserDeleted);
             }
             catch (Exception)
             {
-                return BadRequest(UserMessages.UnexpectedError);
+                return BadRequest(MessagesConstants.UnexpectedError);
             }
         }
 
@@ -135,14 +129,7 @@ namespace MyAssignment.Controllers
 
                 if (user == null)
                 {
-                    return BadRequest(UserMessages.UserNotFound);
-                }
-
-                string? validationError = ValidateUser(updatedUser);
-
-                if (validationError != null)
-                {
-                    return BadRequest(validationError);
+                    return BadRequest(MessagesConstants.UserNotFound);
                 }
 
                 user.FullName = updatedUser.FullName;
@@ -151,11 +138,11 @@ namespace MyAssignment.Controllers
                 user.MembershipType = updatedUser.MembershipType;
                 user.IsActive = updatedUser.IsActive;
 
-                return Ok(UserMessages.UserUpdated);
+                return Ok(MessagesConstants.UserUpdated);
             }
             catch (Exception)
             {
-                return BadRequest(UserMessages.UnexpectedError);
+                return BadRequest(MessagesConstants.UnexpectedError);
             }
         }
 
@@ -168,83 +155,8 @@ namespace MyAssignment.Controllers
         /// <returns>The matching user, or null if none exists.</returns>
         private User? FindUser(int id)
         {
-            User? match = _users.FirstOrDefault(u => u.Id == id);
-            return match;
-        }
-
-        /// <summary>
-        /// Validates a user's data.
-        /// </summary>
-        /// <param name="user">The user to validate.</param>
-        /// <returns>An error message describing the first failure found, or null if the data is valid.</returns>
-        private string? ValidateUser(User user)
-        {
-            // Check for null user
-            if (user == null)
-            {
-                return UserMessages.ValidationFailed;
-            }
-
-            // Check for required fields
-            if (!HasRequiredFields(user))
-            {
-                return UserMessages.ValidationFailed;
-            }
-
-            // Validate email format
-            if (!IsValidEmail(user.Email))
-            {
-                return UserMessages.InvalidEmailFormat;
-            }
-
-            // Validating phone number format
-            if (!IsValidPhoneNumber(user.PhoneNumber))
-            {
-                return UserMessages.InvalidPhoneFormat;
-            }
-
-            // MembershipType provided must be valid
-            if (!IsValidMembership(user.MembershipType))
-            {
-                return UserMessages.InvalidMembershipType;
-            }
-
-            // If all validations pass, return null indicating no errors
-            return null;
-        }
-
-        /// <summary>
-        /// Checks whether all required fields have values.
-        /// </summary>
-        private bool HasRequiredFields(User user)
-        {
-            return !string.IsNullOrWhiteSpace(user.FullName) &&
-                   !string.IsNullOrWhiteSpace(user.Email) &&
-                   !string.IsNullOrWhiteSpace(user.PhoneNumber);
-        }
-
-        /// <summary>
-        /// Validates email format.
-        /// </summary>
-        private bool IsValidEmail(string email)
-        {
-            return Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$");
-        }
-
-        /// <summary>
-        /// Validates Pakistani phone number format.
-        /// </summary>
-        private bool IsValidPhoneNumber(string phoneNumber)
-        {
-            return Regex.IsMatch(phoneNumber, @"^03\d{9}$");
-        }
-
-        /// <summary>
-        /// Validates membership type.
-        /// </summary>
-        private bool IsValidMembership(string membershipType)
-        {
-            return MembershipTypes.AllowedTypes.Contains(membershipType);
+            User? user = _users.FirstOrDefault(u => u.Id == id);
+            return user;
         }
 
         /// <summary>
