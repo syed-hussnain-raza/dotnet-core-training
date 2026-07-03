@@ -1,34 +1,43 @@
 namespace MyAssignment.Helper
 {
-  // generic class for API Response
-  public class ApiResponse<T>
-  {
-    // true if request succeeded, false if failed
-    public bool Success {get; set;}
-    // explanation of the result
-    public string Message{get; set;} = string.Empty;
-    
-    // actual payload - null when nothing to return e.g. DELETE
-    public T? Data {get; set;}
-
-    // constructor
-    public ApiResponse (bool success, string message, T? data)
+    /// <summary>
+    /// Generic wrapper for all API responses, for consistence responses
+    /// </summary>
+    public class ApiResponse<T>
     {
-      Success = success;
-      Message = message;
-      Data = data;
-    }
+        /// <summary>True if the request succeeded, false if it failed.</summary>
+        public bool Success { get; set; }
 
-    // success response with data
-    public static ApiResponse<T> SuccessResponse(string message, T? data)
-    {
-        return new ApiResponse<T>(true, message, data);
-    }
+        /// <summary>Human-readable explanation of the result.</summary>
+        public string Message { get; set; } = string.Empty;
 
-    // fail response - no data needed
-    public static ApiResponse<T> FailResponse(string message)
-    {
-        return new ApiResponse<T>(false, message, default);
+        /// <summary>Actual payload — null when nothing to return (e.g. DELETE).</summary>
+        public T? Data { get; set; }
+
+        /// <summary>
+        /// Creates a new ApiResponse.
+        /// </summary>
+        public ApiResponse(bool success, string message, T? data)
+        {
+            Success = success;
+            Message = message;
+            Data = data;
+        }
+
+        /// <summary>
+        /// Builds a success response with data.
+        /// </summary>
+        public static ApiResponse<T> SuccessResponse(string message, T? data)
+        {
+            return new ApiResponse<T>(true, message, data);
+        }
+
+        /// <summary>
+        /// Builds a failure response — no data needed.
+        /// </summary>
+        public static ApiResponse<T> FailResponse(string message)
+        {
+            return new ApiResponse<T>(false, message, default);
+        }
     }
-  }
 }

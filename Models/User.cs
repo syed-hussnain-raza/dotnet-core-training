@@ -1,28 +1,58 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace MyAssignment.Models
 {
-  // Represents a single User in the system
-  public class User
-  {
-    // Properties (like private variable, with getter and setter)
-    public int Id { get; set; }
-    public string FullName { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public string PhoneNumber { get; set; } = string.Empty;
-    public string MembershipType { get; set; } = "Basic";
-    public bool IsActive { get; set; } = true;
-
-    // Empty Constructor
-    public User () { }
-
-    // Constructor with all the fields
-    public User (int id, string fullName, string email, string phoneNumber, string membershipType = "Basic", bool isActive = true)
+    /// <summary>
+    /// Represents a single User in the system.
+    /// </summary>
+    public class User
     {
-      Id  = id;
-      FullName = fullName;
-      Email = email;
-      PhoneNumber = phoneNumber;
-      MembershipType = membershipType;
-      IsActive = isActive;
+        /// <summary>
+        /// Unique identifier of the user. Server-generated.
+        /// </summary>
+        [Required]
+        public int Id { get; set; }
+
+        /// <summary>
+        /// Full name of the user.
+        /// </summary>
+        [Required]
+        public string FullName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Email address of the user.
+        /// </summary>
+        [Required]
+        public string Email { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Contact phone number of the user.
+        /// </summary>
+        [Required]
+        public string PhoneNumber { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Membership tier of the user. Expected values: "Basic" or "Premium".
+        /// </summary>
+        public string MembershipType { get; set; } = "Basic";
+
+        /// <summary>
+        /// Indicates whether the user's account is active.
+        /// </summary>
+        [Required]
+        public bool IsActive { get; set; } = true;
+
+        /// <summary>
+        /// Creates a new User with all fields.
+        /// </summary>
+        public User(int id, string fullName, string email, string phoneNumber, string membershipType = "Basic", bool isActive = true)
+        {
+            Id = id;
+            FullName = fullName;
+            Email = email;
+            PhoneNumber = phoneNumber;
+            MembershipType = membershipType;
+            IsActive = isActive;
+        }
     }
-  }
 }

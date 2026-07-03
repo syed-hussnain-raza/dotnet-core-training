@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using MyAssignment.Helper;
 using MyAssignment.Services;
 using Asp.Versioning;
@@ -7,6 +8,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 // register controllers so app look for controller class
 builder.Services.AddControllers();
+
+// disable the built-in automatic 400 response for invalid ModelState, so the
+// controller can check ModelState.IsValid itself and return validation
+// errors wrapped in our own ApiResponse<T> shape instead of the default
+// ValidationProblemDetails format
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
 
 // register services for swagger to generate API documentation
 builder.Services.AddEndpointsApiExplorer();

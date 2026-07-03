@@ -1,14 +1,17 @@
 using AutoMapper;
 using MyAssignment.Models;
+using MyAssignment.Dtos;
 
 namespace MyAssignment.Helper
 {
+    /// <summary>
+    /// AutoMapper configuration for the User API.
+    /// </summary>
     public class MappingProfile : Profile
     {
         public MappingProfile()
         {
             // Tell AutoMapper: UserDto → User
-            // Id and IsActive are NOT in UserDto so they keep their defaults
             CreateMap<UserDto, User>();
         }
     }
