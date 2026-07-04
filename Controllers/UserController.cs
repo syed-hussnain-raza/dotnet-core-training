@@ -12,10 +12,13 @@ namespace MyAssignment.Controllers
     /// Handles all user-related API requests: create, read, update, and delete.
     /// </summary>
     [ApiController]
-    [ApiVersion("1.0")]
-    [Route("api/v{version:apiVersion}/users")] // dynamic version in route
+    [ApiVersion(ApiVersions.V1)]
+    [Route(ApiRoutes.Users)] // dynamic version in route
     public class UserController : ControllerBase
     {
+        /// <summary>
+        /// Service responsible for user business logic and data management.
+        /// </summary>
         private readonly IUserService _userService;
 
         /// <summary>
