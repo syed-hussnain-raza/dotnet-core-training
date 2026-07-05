@@ -7,7 +7,10 @@ using Asp.Versioning;
 var builder = WebApplication.CreateBuilder(args);
 
 // register controllers so app look for controller class
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ValidateModelStateFilter>();
+});
 
 // disable the built-in automatic 400 response for invalid ModelState, so the
 // controller can check ModelState.IsValid itself and return validation
