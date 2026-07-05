@@ -8,7 +8,7 @@ namespace MyAssignment.Controllers
     /// Handles all user-related API requests: create, read, update, and delete.
     /// </summary>
     [ApiController]            // Enables API-specific behavior like automatic validation and binding
-    [Route(ApiRoutes.Users)]   // Base URL for all endpoints in this controller
+    [Route(ApiRoutesConstants.Users)]   // Base URL for all endpoints in this controller
     public class UserController : ControllerBase
     {
         // In-memory list acting as a database
