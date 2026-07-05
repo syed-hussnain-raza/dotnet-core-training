@@ -12,8 +12,8 @@ namespace MyAssignment.Controllers
     /// Handles all user-related API requests: create, read, update, and delete.
     /// </summary>
     [ApiController]
-    [ApiVersion(ApiVersions.V1)]
-    [Route(ApiRoutes.Users)] // dynamic version in route
+    [ApiVersion(ApiVersionsConstants.V1)]
+    [Route(ApiRoutesConstants.Users)]
     public class UserController : ControllerBase
     {
         /// <summary>
@@ -37,15 +37,19 @@ namespace MyAssignment.Controllers
         [HttpGet]
         public IActionResult GetAllUsers()
         {
+            IActionResult result;
+
             try
             {
                 List<User> users = _userService.GetAllUsers();
-                return Ok(ApiResponse<List<User>>.SuccessResponse(UserMessages.UsersFetched, users));
+                result = Ok(ApiResponse<List<User>>.SuccessResponse(MessagesConstants.UsersFetched, users));
             }
             catch (Exception)
             {
-                return BadRequest(ApiResponse<List<User>>.FailResponse(UserMessages.UnexpectedError));
+                result = BadRequest(ApiResponse<List<User>>.FailResponse(MessagesConstants.UnexpectedError));
             }
+
+            return result;
         }
 
         /// <summary>
@@ -56,21 +60,27 @@ namespace MyAssignment.Controllers
         [HttpGet("{id}")]
         public IActionResult GetUserById(int id)
         {
+            IActionResult result;
+
             try
             {
                 User? user = _userService.GetUserById(id);
 
                 if (user == null)
                 {
-                    return BadRequest(ApiResponse<User>.FailResponse(UserMessages.UserNotFound));
+                    result = BadRequest(ApiResponse<User>.FailResponse(MessagesConstants.UserNotFound));
                 }
-
-                return Ok(ApiResponse<User>.SuccessResponse(UserMessages.UserFetched, user));
+                else
+                {
+                    result = Ok(ApiResponse<User>.SuccessResponse(MessagesConstants.UserFetched, user));
+                }
             }
             catch (Exception)
             {
-                return BadRequest(ApiResponse<User>.FailResponse(UserMessages.UnexpectedError));
+                result = BadRequest(ApiResponse<User>.FailResponse(MessagesConstants.UnexpectedError));
             }
+
+            return result;
         }
 
         /// <summary>
@@ -81,21 +91,19 @@ namespace MyAssignment.Controllers
         [HttpPost]
         public IActionResult CreateUser(UserDto dto)
         {
+            IActionResult result;
+
             try
             {
-                if (!ModelState.IsValid)
-                {
-                    string errorMessage = BuildValidationErrorMessage();
-                    return BadRequest(ApiResponse<User>.FailResponse(errorMessage));
-                }
-
                 User user = _userService.CreateUser(dto);
-                return Ok(ApiResponse<User>.SuccessResponse(UserMessages.UserCreated, user));
+                result = Ok(ApiResponse<User>.SuccessResponse(MessagesConstants.UserCreated, user));
             }
             catch (Exception)
             {
-                return BadRequest(ApiResponse<User>.FailResponse(UserMessages.UnexpectedError));
+                result = BadRequest(ApiResponse<User>.FailResponse(MessagesConstants.UnexpectedError));
             }
+
+            return result;
         }
 
         /// <summary>
@@ -106,21 +114,27 @@ namespace MyAssignment.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteUser(int id)
         {
+            IActionResult result;
+
             try
             {
                 bool deleted = _userService.DeleteUser(id);
 
                 if (!deleted)
                 {
-                    return BadRequest(ApiResponse<object>.FailResponse(UserMessages.UserNotFound));
+                    result = BadRequest(ApiResponse<object>.FailResponse(MessagesConstants.UserNotFound));
                 }
-
-                return Ok(ApiResponse<object>.SuccessResponse(UserMessages.UserDeleted, default));
+                else
+                {
+                    result = Ok(ApiResponse<object>.SuccessResponse(MessagesConstants.UserDeleted, default));
+                }
             }
             catch (Exception)
             {
-                return BadRequest(ApiResponse<object>.FailResponse(UserMessages.UnexpectedError));
+                result = BadRequest(ApiResponse<object>.FailResponse(MessagesConstants.UnexpectedError));
             }
+
+            return result;
         }
 
         /// <summary>
@@ -132,42 +146,27 @@ namespace MyAssignment.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateUser(int id, UserDto dto)
         {
+            IActionResult result;
+
             try
             {
-                if (!ModelState.IsValid)
-                {
-                    string errorMessage = BuildValidationErrorMessage();
-                    return BadRequest(ApiResponse<User>.FailResponse(errorMessage));
-                }
-
                 User? user = _userService.UpdateUser(id, dto);
 
                 if (user == null)
                 {
-                    return BadRequest(ApiResponse<User>.FailResponse(UserMessages.UserNotFoundForUpdate));
+                    result = BadRequest(ApiResponse<User>.FailResponse(MessagesConstants.UserNotFound));
                 }
-
-                return Ok(ApiResponse<User>.SuccessResponse(UserMessages.UserUpdated, user));
+                else
+                {
+                    result = Ok(ApiResponse<User>.SuccessResponse(MessagesConstants.UserUpdated, user));
+                }
             }
             catch (Exception)
             {
-                return BadRequest(ApiResponse<User>.FailResponse(UserMessages.UnexpectedError));
+                result = BadRequest(ApiResponse<User>.FailResponse(MessagesConstants.UnexpectedError));
             }
-        }
 
-        // Private Helper Methods
-
-        /// <summary>
-        /// Collects all current ModelState validation errors into a single message.
-        /// </summary>
-        /// <returns>A space-separated string of validation error messages.</returns>
-        private string BuildValidationErrorMessage()
-        {
-            IEnumerable<string> errors = ModelState.Values
-                .SelectMany(v => v.Errors)
-                .Select(e => e.ErrorMessage);
-
-            return string.Join(" ", errors);
+            return result;
         }
     }
 }
