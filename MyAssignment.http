@@ -2,18 +2,18 @@
 
 ### Get all users
 
-GET {{MyAssignment_HostAddress}}/api/users
+GET {{MyAssignment_HostAddress}}/api/v1/users
 Accept: application/json
 
 
 ### Get user by Id
 
-GET {{MyAssignment_HostAddress}}/api/users/1
+GET {{MyAssignment_HostAddress}}/api/v1/users/1
 Accept: application/json
 
 ### Create a new user
 
-POST {{MyAssignment_HostAddress}}/api/users
+POST {{MyAssignment_HostAddress}}/api/v1/users
 Content-Type: application/json
 
 {
@@ -26,7 +26,7 @@ Content-Type: application/json
 
 ### Update an existing user
 
-PUT {{MyAssignment_HostAddress}}/api/users/1
+PUT {{MyAssignment_HostAddress}}/api/v1/users/1
 Content-Type: application/json
 
 {
@@ -41,4 +41,4 @@ Content-Type: application/json
 
 ### Delete a user
 
-DELETE {{MyAssignment_HostAddress}}/api/users/1
+DELETE {{MyAssignment_HostAddress}}/api/v1/users/1
