@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MyAssignment.Helper;
 using MyAssignment.Models;
 using MyAssignment.Dtos;
@@ -98,6 +99,10 @@ namespace MyAssignment.Controllers
                 User user = _userService.CreateUser(dto);
                 result = Ok(ApiResponse<User>.SuccessResponse(MessagesConstants.UserCreated, user));
             }
+            catch (DbUpdateException)
+            {
+                result = BadRequest(ApiResponse<User>.FailResponse(MessagesConstants.SaveFailed));
+            }
             catch (Exception)
             {
                 result = BadRequest(ApiResponse<User>.FailResponse(MessagesConstants.UnexpectedError));
@@ -128,6 +133,14 @@ namespace MyAssignment.Controllers
                 {
                     result = Ok(ApiResponse<object>.SuccessResponse(MessagesConstants.UserDeleted, default));
                 }
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                result = Conflict(ApiResponse<object>.FailResponse(MessagesConstants.ConcurrencyConflict));
+            }
+            catch (DbUpdateException)
+            {
+                result = BadRequest(ApiResponse<object>.FailResponse(MessagesConstants.SaveFailed));
             }
             catch (Exception)
             {
@@ -160,6 +173,14 @@ namespace MyAssignment.Controllers
                 {
                     result = Ok(ApiResponse<User>.SuccessResponse(MessagesConstants.UserUpdated, user));
                 }
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                result = Conflict(ApiResponse<User>.FailResponse(MessagesConstants.ConcurrencyConflict));
+            }
+            catch (DbUpdateException)
+            {
+                result = BadRequest(ApiResponse<User>.FailResponse(MessagesConstants.SaveFailed));
             }
             catch (Exception)
             {
