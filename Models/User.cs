@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace MyAssignment.Models
 {
     /// <summary>
@@ -10,25 +8,21 @@ namespace MyAssignment.Models
         /// <summary>
         /// Unique identifier of the user. Server-generated.
         /// </summary>
-        [Required]
         public int Id { get; set; }
 
         /// <summary>
         /// Full name of the user.
         /// </summary>
-        [Required]
         public string FullName { get; set; } = string.Empty;
 
         /// <summary>
         /// Email address of the user.
         /// </summary>
-        [Required]
         public string Email { get; set; } = string.Empty;
 
         /// <summary>
         /// Contact phone number of the user.
         /// </summary>
-        [Required]
         public string PhoneNumber { get; set; } = string.Empty;
 
         /// <summary>
@@ -39,8 +33,13 @@ namespace MyAssignment.Models
         /// <summary>
         /// Indicates whether the user's account is active.
         /// </summary>
-        [Required]
         public bool IsActive { get; set; } = true;
+        
+        /// <summary>
+        /// Parameters less constructor
+        /// </summary>
+        public User ()
+        { }
 
         /// <summary>
         /// Creates a new User with all fields.
