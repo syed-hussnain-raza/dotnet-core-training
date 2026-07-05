@@ -10,15 +10,17 @@ namespace MyAssignment.Services
     public class UserService : IUserService
     {
         private readonly IMapper _mapper;
-
-        // In-memory list acting as a database
+        
+        /// <summary>
+        /// In-memory list acting as a database
+        /// </summary>
         private static List<User> _users = new List<User>
-    {
-        new User(1, "Hussnain", "hussnain@gmail.com", "03001234567", "Premium", true),
-        new User(2, "Hasnat", "hasnat@gmail.com", "03001234432", "Premium", true),
-        new User(3, "Ali", "ali@gmail.com", "03007654321", "Basic", true),
-        new User(4, "Sara", "sara@gmail.com", "03009876543", "Premium", false)
-    };
+        {
+            new User(1, "Hussnain", "hussnain@gmail.com", "03001234567", "Premium", true),
+            new User(2, "Hasnat", "hasnat@gmail.com", "03001234432", "Premium", true),
+            new User(3, "Ali", "ali@gmail.com", "03007654321", "Basic", true),
+            new User(4, "Sara", "sara@gmail.com", "03009876543", "Premium", false)
+        };
 
         /// <summary>
         /// Creates a new UserService with the given AutoMapper instance injected.
@@ -45,7 +47,7 @@ namespace MyAssignment.Services
         /// <returns>The matching user, or null if none exists.</returns>
         public User? GetUserById(int id)
         {
-            User? user = _users.FirstOrDefault(u => u.Id == id);
+            User? user = FindUser(id);
             return user;
         }
 
@@ -71,7 +73,7 @@ namespace MyAssignment.Services
         /// <returns>The updated user, or null if no user with the given id exists.</returns>
         public User? UpdateUser(int id, UserDto dto)
         {
-            User? user = _users.FirstOrDefault(u => u.Id == id);
+            User? user = FindUser(id);
 
             if (user == null)
             {
@@ -89,7 +91,7 @@ namespace MyAssignment.Services
         /// <returns>True if the user was found and deleted; otherwise false.</returns>
         public bool DeleteUser(int id)
         {
-            User? user = _users.FirstOrDefault(u => u.Id == id);
+            User? user = FindUser(id);
 
             if (user == null)
             {
@@ -108,6 +110,14 @@ namespace MyAssignment.Services
         {
             int nextId = _users.Count == 0 ? 1 : _users.Max(u => u.Id) + 1;
             return nextId;
+        }
+
+        /// <summary>
+        /// Finds a user by id in the in-memory list.
+        /// </summary>
+        private User? FindUser(int id)
+        {
+            return _users.FirstOrDefault(u => u.Id == id);
         }
     }
 }
