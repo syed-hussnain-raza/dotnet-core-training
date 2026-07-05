@@ -1,6 +1,6 @@
 namespace MyAssignment.Constants
 {
-    public static class ApiVersions
+    public static class ApiVersionsConstants
     {
         public const string V1 = "1.0";
     }
