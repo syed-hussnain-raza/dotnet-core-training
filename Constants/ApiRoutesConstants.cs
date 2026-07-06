@@ -7,5 +7,6 @@ namespace MyAssignment.Constants
     {
         public const string Version = "v{version:apiVersion}";
         public const string Users = $"api/{Version}/users";
+        public const string Auth = $"api/{Version}/auth";
     }
 }
