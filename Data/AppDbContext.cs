@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MyAssignment.Models;
 using MyAssignment.Constants;
@@ -5,21 +7,28 @@ using MyAssignment.Constants;
 namespace MyAssignment.Data
 {
     /// <summary>
-    /// EF Core database context for the application.
+    /// EF Core database context for the application. Inherits from
+    /// IdentityDbContext to add ASP.NET Core Identity's own tables
     /// </summary>
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<IdentityUser>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
 
-        public DbSet<User> Users { get; set; } = null!;
+        public new DbSet<User> Users { get; set; } = null!;
 
         /// <summary>
         /// Configures schema-level constraints via Fluent API. These are enforced by SQL Server itself.
         /// </summary>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Required: IdentityDbContext's own OnModelCreating configures its Identity tables.
+            base.OnModelCreating(modelBuilder);
+            
+            /// <summary>
+            /// Configure the User entity
+            /// </summary>
             modelBuilder.Entity<User>(entity =>
             {
                 entity.HasKey(u => u.Id);
