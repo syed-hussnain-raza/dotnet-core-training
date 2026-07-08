@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MyAssignment.Constants;
 using MyAssignment.Dtos;
@@ -18,13 +17,15 @@ namespace MyAssignment.Controllers
     [AllowAnonymous]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly IJwtTokenService _jwtTokenService;
+        private readonly IAuthService _authService;
 
-        public AuthController(UserManager<IdentityUser> userManager, IJwtTokenService jwtTokenService)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AuthController"/> class.
+        /// </summary>
+        /// <param name="authService"></param>
+        public AuthController(IAuthService authService)
         {
-            _userManager = userManager;
-            _jwtTokenService = jwtTokenService;
+            _authService = authService;
         }
 
         /// <summary>
@@ -39,22 +40,15 @@ namespace MyAssignment.Controllers
 
             try
             {
-                IdentityUser identityUser = new IdentityUser
-                {
-                    UserName = dto.Email,
-                    Email = dto.Email
-                };
+                (bool succeeded, string errorMessage) = await _authService.RegisterAsync(dto);
 
-                IdentityResult identityResult = await _userManager.CreateAsync(identityUser, dto.Password);
-
-                if (identityResult.Succeeded)
+                if (succeeded)
                 {
                     result = Ok(ApiResponse<object>.SuccessResponse(MessagesConstants.UserRegistered, default));
                 }
                 else
                 {
-                    string errors = string.Join(" ", identityResult.Errors.Select(e => e.Description));
-                    result = BadRequest(ApiResponse<object>.FailResponse(errors.Length > 0 ? errors : MessagesConstants.RegistrationFailed));
+                    result = BadRequest(ApiResponse<object>.FailResponse(errorMessage.Length > 0 ? errorMessage : MessagesConstants.RegistrationFailed));
                 }
             }
             catch (Exception)
@@ -77,18 +71,15 @@ namespace MyAssignment.Controllers
 
             try
             {
-                IdentityUser? identityUser = await _userManager.FindByEmailAsync(dto.Email);
-                bool passwordValid = identityUser != null && await _userManager.CheckPasswordAsync(identityUser, dto.Password);
+                (bool succeeded, string token) = await _authService.LoginAsync(dto);
 
-                if (!passwordValid || identityUser == null)
+                if (succeeded)
                 {
-                    result = BadRequest(ApiResponse<object>.FailResponse(MessagesConstants.InvalidCredentials));
+                    result = Ok(ApiResponse<string>.SuccessResponse(MessagesConstants.LoginSuccess, token));
                 }
                 else
                 {
-                    IList<string> roles = await _userManager.GetRolesAsync(identityUser);
-                    string token = _jwtTokenService.GenerateToken(identityUser, roles);
-                    result = Ok(ApiResponse<string>.SuccessResponse(MessagesConstants.LoginSuccess, token));
+                    result = BadRequest(ApiResponse<object>.FailResponse(MessagesConstants.InvalidCredentials));
                 }
             }
             catch (Exception)
