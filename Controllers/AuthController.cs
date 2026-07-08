@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyAssignment.Constants;
 using MyAssignment.Dtos;
-using MyAssignment.Helper;
 using MyAssignment.Services;
 using Asp.Versioning;
 
@@ -15,7 +14,7 @@ namespace MyAssignment.Controllers
     [ApiVersion(ApiVersionsConstants.V1)]
     [Route(ApiRoutesConstants.Auth)]
     [AllowAnonymous]
-    public class AuthController : ControllerBase
+    public class AuthController : BaseApiController
     {
         private readonly IAuthService _authService;
 
@@ -33,7 +32,7 @@ namespace MyAssignment.Controllers
         /// </summary>
         /// <param name="dto">Email and password for the new account.</param>
         /// <returns>200 OK if registered; otherwise 400 Bad Request.</returns>
-        [HttpPost("register")]
+        [HttpPost(ApiRoutesConstants.Register)]
         public async Task<IActionResult> Register(RegisterDto dto)
         {
             IActionResult result;
@@ -44,16 +43,16 @@ namespace MyAssignment.Controllers
 
                 if (succeeded)
                 {
-                    result = Ok(ApiResponse<object>.SuccessResponse(MessagesConstants.UserRegistered, default));
+                    result = Ok<object>(MessagesConstants.UserRegistered, default);
                 }
                 else
                 {
-                    result = BadRequest(ApiResponse<object>.FailResponse(errorMessage.Length > 0 ? errorMessage : MessagesConstants.RegistrationFailed));
+                    result = BadRequest(errorMessage.Length > 0 ? errorMessage : MessagesConstants.RegistrationFailed);
                 }
             }
             catch (Exception)
             {
-                result = BadRequest(ApiResponse<object>.FailResponse(MessagesConstants.UnexpectedError));
+                result = BadRequest(MessagesConstants.UnexpectedError);
             }
 
             return result;
@@ -64,7 +63,7 @@ namespace MyAssignment.Controllers
         /// </summary>
         /// <param name="dto">Login credentials.</param>
         /// <returns>200 OK with a JWT if valid; otherwise 400 Bad Request.</returns>
-        [HttpPost("login")]
+        [HttpPost(ApiRoutesConstants.Login)]
         public async Task<IActionResult> Login(LoginDto dto)
         {
             IActionResult result;
@@ -75,16 +74,16 @@ namespace MyAssignment.Controllers
 
                 if (succeeded)
                 {
-                    result = Ok(ApiResponse<string>.SuccessResponse(MessagesConstants.LoginSuccess, token));
+                    result = Ok(MessagesConstants.LoginSuccess, token);
                 }
                 else
                 {
-                    result = BadRequest(ApiResponse<object>.FailResponse(MessagesConstants.InvalidCredentials));
+                    result = BadRequest(MessagesConstants.InvalidCredentials);
                 }
             }
             catch (Exception)
             {
-                result = BadRequest(ApiResponse<object>.FailResponse(MessagesConstants.UnexpectedError));
+                result = BadRequest(MessagesConstants.UnexpectedError);
             }
 
             return result;

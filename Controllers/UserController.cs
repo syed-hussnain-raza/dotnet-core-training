@@ -1,6 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MyAssignment.Helper;
 using MyAssignment.Models;
 using MyAssignment.Dtos;
 using MyAssignment.Services;
@@ -15,7 +13,7 @@ namespace MyAssignment.Controllers
     [ApiController]
     [ApiVersion(ApiVersionsConstants.V1)]
     [Route(ApiRoutesConstants.Users)]
-    public class UserController : ControllerBase
+    public class UserController : BaseApiController
     {
         /// <summary>
         /// Service responsible for user business logic and data management.
@@ -43,11 +41,11 @@ namespace MyAssignment.Controllers
             try
             {
                 List<User> users = _userService.GetAllUsers();
-                result = Ok(ApiResponse<List<User>>.SuccessResponse(MessagesConstants.UsersFetched, users));
+                result = Ok(MessagesConstants.UsersFetched, users);
             }
             catch (Exception)
             {
-                result = BadRequest(ApiResponse<List<User>>.FailResponse(MessagesConstants.UnexpectedError));
+                result = BadRequest(MessagesConstants.UnexpectedError);
             }
 
             return result;
@@ -69,16 +67,16 @@ namespace MyAssignment.Controllers
 
                 if (user == null)
                 {
-                    result = BadRequest(ApiResponse<User>.FailResponse(MessagesConstants.UserNotFound));
+                    result = BadRequest(MessagesConstants.UserNotFound);
                 }
                 else
                 {
-                    result = Ok(ApiResponse<User>.SuccessResponse(MessagesConstants.UserFetched, user));
+                    result = Ok(MessagesConstants.UserFetched, user);
                 }
             }
             catch (Exception)
             {
-                result = BadRequest(ApiResponse<User>.FailResponse(MessagesConstants.UnexpectedError));
+                result = BadRequest(MessagesConstants.UnexpectedError);
             }
 
             return result;
@@ -97,15 +95,11 @@ namespace MyAssignment.Controllers
             try
             {
                 User user = _userService.CreateUser(dto);
-                result = Ok(ApiResponse<User>.SuccessResponse(MessagesConstants.UserCreated, user));
-            }
-            catch (DbUpdateException)
-            {
-                result = BadRequest(ApiResponse<User>.FailResponse(MessagesConstants.SaveFailed));
+                result = Ok(MessagesConstants.UserCreated, user);
             }
             catch (Exception)
             {
-                result = BadRequest(ApiResponse<User>.FailResponse(MessagesConstants.UnexpectedError));
+                result = BadRequest(MessagesConstants.UnexpectedError);
             }
 
             return result;
@@ -127,24 +121,16 @@ namespace MyAssignment.Controllers
 
                 if (!deleted)
                 {
-                    result = BadRequest(ApiResponse<object>.FailResponse(MessagesConstants.UserNotFound));
+                    result = BadRequest(MessagesConstants.UserNotFound);
                 }
                 else
                 {
-                    result = Ok(ApiResponse<object>.SuccessResponse(MessagesConstants.UserDeleted, default));
+                    result = Ok<object>(MessagesConstants.UserDeleted, default);
                 }
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                result = Conflict(ApiResponse<object>.FailResponse(MessagesConstants.ConcurrencyConflict));
-            }
-            catch (DbUpdateException)
-            {
-                result = BadRequest(ApiResponse<object>.FailResponse(MessagesConstants.SaveFailed));
             }
             catch (Exception)
             {
-                result = BadRequest(ApiResponse<object>.FailResponse(MessagesConstants.UnexpectedError));
+                result = BadRequest(MessagesConstants.UnexpectedError);
             }
 
             return result;
@@ -167,24 +153,16 @@ namespace MyAssignment.Controllers
 
                 if (user == null)
                 {
-                    result = BadRequest(ApiResponse<User>.FailResponse(MessagesConstants.UserNotFound));
+                    result = BadRequest(MessagesConstants.UserNotFound);
                 }
                 else
                 {
-                    result = Ok(ApiResponse<User>.SuccessResponse(MessagesConstants.UserUpdated, user));
+                    result = Ok(MessagesConstants.UserUpdated, user);
                 }
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                result = Conflict(ApiResponse<User>.FailResponse(MessagesConstants.ConcurrencyConflict));
-            }
-            catch (DbUpdateException)
-            {
-                result = BadRequest(ApiResponse<User>.FailResponse(MessagesConstants.SaveFailed));
             }
             catch (Exception)
             {
-                result = BadRequest(ApiResponse<User>.FailResponse(MessagesConstants.UnexpectedError));
+                result = BadRequest(MessagesConstants.UnexpectedError);
             }
 
             return result;
