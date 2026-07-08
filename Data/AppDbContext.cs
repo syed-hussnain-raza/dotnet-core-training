@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using MyAssignment.Models;
-using MyAssignment.Constants;
 
 namespace MyAssignment.Data
 {
@@ -9,44 +8,21 @@ namespace MyAssignment.Data
     /// </summary>
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+            : base(options)
         {
         }
 
         public DbSet<User> Users { get; set; } = null!;
 
         /// <summary>
-        /// Configures schema-level constraints via Fluent API. These are enforced by SQL Server itself.
+        /// Applies all entity configurations from the current assembly.
         /// </summary>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>(entity =>
-            {
-                entity.HasKey(u => u.Id);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
-                entity.Property(u => u.FullName)
-                    .IsRequired()
-                    .HasMaxLength(50);
-
-                entity.Property(u => u.Email)
-                    .IsRequired()
-                    .HasMaxLength(256);
-
-                entity.HasIndex(u => u.Email)
-                    .IsUnique();
-
-                entity.Property(u => u.PhoneNumber)
-                    .IsRequired()
-                    .HasMaxLength(20);
-
-                entity.Property(u => u.MembershipType)
-                    .IsRequired()
-                    .HasMaxLength(20)
-                    .HasDefaultValue(MembershipTypesConstants.Basic);
-
-                entity.Property(u => u.IsActive)
-                    .HasDefaultValue(true);
-            });
+            base.OnModelCreating(modelBuilder);
         }
     }
 }
