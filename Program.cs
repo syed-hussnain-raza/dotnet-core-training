@@ -49,20 +49,23 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 // register the IUserService interface and its implementation UserService for dependency injection
 builder.Services.AddScoped<IUserService, UserService>();
 
+// register the IAuthService interface and its implementation AuthService for dependency injection
+builder.Services.AddScoped<IAuthService, AuthService>();
+
 // register the JWT token generation service for dependency injection
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 // API Versioning configuration
 builder.Services.AddApiVersioning(options =>
 {
-    options.ReportApiVersions = true; // tells client which versions are available in response headers
+    options.ReportApiVersions = true;
 }).AddMvc();
 
 // finalize registeration and build the runnable app
 var app = builder.Build();
 
-app.UseSwagger(); // enable swagger middleware
-app.UseSwaggerUI(); // enable swagger UI middleware
+app.UseSwagger();
+app.UseSwaggerUI();
 
 // authentication must run before authorization in the middleware pipeline
 app.UseAuthentication();
