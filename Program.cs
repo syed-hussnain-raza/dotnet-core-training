@@ -44,7 +44,7 @@ builder.Services.AddApiVersioning(options =>
 }).AddMvc();
 
 
-//  finalize registeration and build the runnable app
+// finalize registeration and build the runnable app
 var app = builder.Build();
 
 app.UseSwagger(); // enable swagger middleware
@@ -53,5 +53,5 @@ app.UseSwaggerUI(); // enable swagger UI middleware
 // enable routing middleware to route incoming requests to the appropriate controller actions
 app.MapControllers();
 
-//  start web server and listen for incoming requests
+// start web server and listen for incoming requests
 app.Run();
