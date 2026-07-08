@@ -1,0 +1,44 @@
+@MyAssignment_HostAddress = http://localhost:5171
+
+### Get all users
+
+GET {{MyAssignment_HostAddress}}/api/users
+Accept: application/json
+
+
+### Get user by Id
+
+GET {{MyAssignment_HostAddress}}/api/users/1
+Accept: application/json
+
+### Create a new user
+
+POST {{MyAssignment_HostAddress}}/api/users
+Content-Type: application/json
+
+{
+  "fullName": "Ahmed Raza",
+  "email": "ahmed@gmail.com",
+  "phoneNumber": "03012345678",
+  "membershipType": "Premium",
+  "isActive": true
+}
+
+### Update an existing user
+
+PUT {{MyAssignment_HostAddress}}/api/users/1
+Content-Type: application/json
+
+{
+  "id": 1,
+  "fullName": "Ahmed Ali",
+  "email": "ahmedali@gmail.com",
+  "phoneNumber": "03098765432",
+  "membershipType": "Basic",
+  "isActive": true
+}
+
+
+### Delete a user
+
+DELETE {{MyAssignment_HostAddress}}/api/users/1
