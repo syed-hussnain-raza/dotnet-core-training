@@ -5,6 +5,7 @@ namespace MyAssignment.Constants
     /// </summary>
     public static class ApiRoutesConstants
     {
-        public const string Users = $"api/users";
+        public const string Version = "v{version:apiVersion}";
+        public const string Users = $"api/{Version}/users";
     }
 }

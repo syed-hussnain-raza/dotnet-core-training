@@ -16,34 +16,33 @@ namespace MyAssignment.Models
         /// <summary>
         /// Full name of the user.
         /// </summary>
-        [Required]
         public string FullName { get; set; } = string.Empty;
 
         /// <summary>
         /// Email address of the user.
         /// </summary>
-        [Required]
-        [EmailAddress(ErrorMessage = MessagesConstants.InvalidEmailFormat)]
         public string Email { get; set; } = string.Empty;
 
         /// <summary>
         /// Contact phone number of the user.
         /// </summary>
-        [Required]
-        [RegularExpression(@"^03\d{9}$", ErrorMessage = MessagesConstants.InvalidPhoneFormat)]
         public string PhoneNumber { get; set; } = string.Empty;
 
         /// <summary>
         /// Membership tier of the user. Expected values: "Basic" or "Premium".
         /// </summary>
-        [Required]
-        [RegularExpression(@"^(Basic|Premium)$", ErrorMessage = MessagesConstants.InvalidMembershipType)]
         public string MembershipType { get; set; } = "Basic";
 
         /// <summary>
         /// Indicates whether the user's account is active.
         /// </summary>
         public bool IsActive { get; set; } = true;
+        
+        /// <summary>
+        /// Parameters less constructor
+        /// </summary>
+        public User ()
+        { }
 
         /// <summary>
         /// Creates a new User with all fields.

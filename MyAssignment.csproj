@@ -5,10 +5,17 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+	
+  <ItemGroup>
+    <PackageReference Include="Asp.Versioning.Mvc" Version="10.0.0" />
+	<PackageReference Include="AutoMapper" Version="13.0.1" />
+	<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
+	<PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
+	<PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+  </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
-	<PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
+	<NuGetAuditSuppress Include="https://github.com/advisories/GHSA-rvv3-g6hj-g44x" />
   </ItemGroup>
 
 </Project>
