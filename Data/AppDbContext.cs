@@ -1,8 +1,7 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using MyAssignment.Models;
-using MyAssignment.Constants;
 
 namespace MyAssignment.Data
 {
@@ -12,10 +11,19 @@ namespace MyAssignment.Data
     /// </summary>
     public class AppDbContext : IdentityDbContext<IdentityUser>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AppDbContext"/> class.
+        /// </summary>
+        /// <param name="options">
+        /// The options used to configure the database context.
+        /// </param>
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
 
+        /// <summary>
+        /// Represents the Users table in the database. This is a DbSet of User entities.
+        /// </summary>
         public new DbSet<User> Users { get; set; } = null!;
 
         /// <summary>
@@ -23,39 +31,11 @@ namespace MyAssignment.Data
         /// </summary>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Required: IdentityDbContext's own OnModelCreating configures its Identity tables.
+            // Configure ASP.NET Core Identity tables.
             base.OnModelCreating(modelBuilder);
-            
-            /// <summary>
-            /// Configure the User entity
-            /// </summary>
-            modelBuilder.Entity<User>(entity =>
-            {
-                entity.HasKey(u => u.Id);
 
-                entity.Property(u => u.FullName)
-                    .IsRequired()
-                    .HasMaxLength(50);
-
-                entity.Property(u => u.Email)
-                    .IsRequired()
-                    .HasMaxLength(256);
-
-                entity.HasIndex(u => u.Email)
-                    .IsUnique();
-
-                entity.Property(u => u.PhoneNumber)
-                    .IsRequired()
-                    .HasMaxLength(20);
-
-                entity.Property(u => u.MembershipType)
-                    .IsRequired()
-                    .HasMaxLength(20)
-                    .HasDefaultValue(MembershipTypesConstants.Basic);
-
-                entity.Property(u => u.IsActive)
-                    .HasDefaultValue(true);
-            });
+            // Apply all entity configurations from the assembly containing AppDbContext.
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         }
     }
 }
