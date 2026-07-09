@@ -11,27 +11,27 @@ namespace MyAssignment.Services
         /// <summary>
         /// Retrieves all users.
         /// </summary>
-        List<User> GetAllUsers();
+        Task<List<User>> GetAllUsersAsync();
 
         /// <summary>
         /// Retrieves a single user by id, or null if none exists.
         /// </summary>
-        User? GetUserById(int id);
+        Task<User?> GetUserByIdAsync(int id);
 
         /// <summary>
         /// Creates a new user from the given DTO.
         /// </summary>
-        User CreateUser(UserDto dto);
+        Task<User> CreateUserAsync(UserDto dto);
 
         /// <summary>
         /// Updates an existing user with the given DTO's values, or null if no
         /// matching user exists.
         /// </summary>
-        User? UpdateUser(int id, UserDto dto);
+        Task<User?> UpdateUserAsync(int id, UserDto dto);
 
         /// <summary>
         /// Deletes a user by id. Returns true if found and deleted.
         /// </summary>
-        bool DeleteUser(int id);
+        Task<bool> DeleteUserAsync(int id);
     }
 }

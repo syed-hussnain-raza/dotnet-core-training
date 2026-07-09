@@ -27,7 +27,7 @@ namespace MyAssignment.Data
         public new DbSet<User> Users { get; set; } = null!;
 
         /// <summary>
-        /// Configures schema-level constraints via Fluent API. These are enforced by SQL Server itself.
+        /// Applies all entity configurations from the current assembly.
         /// </summary>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

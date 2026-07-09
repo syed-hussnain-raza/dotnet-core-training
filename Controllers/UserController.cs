@@ -34,14 +34,14 @@ namespace MyAssignment.Controllers
         /// </summary>
         /// <returns>200 OK with the list of users.</returns>
         [HttpGet]
-        public IActionResult GetAllUsers()
+        public async Task<IActionResult> GetAllUsers()
         {
             IActionResult result;
 
             try
             {
-                List<User> users = _userService.GetAllUsers();
-                result = Ok(MessagesConstants.UsersFetched, users);
+                List<User> users = await _userService.GetAllUsersAsync();
+                result = Ok(ApiResponse<List<User>>.SuccessResponse(MessagesConstants.UsersFetched, users));
             }
             catch (Exception)
             {
@@ -57,13 +57,13 @@ namespace MyAssignment.Controllers
         /// <param name="id">The unique identifier of the user.</param>
         /// <returns>200 OK with the user if found; otherwise 400 Bad Request.</returns>
         [HttpGet("{id}")]
-        public IActionResult GetUserById(int id)
+        public async Task<IActionResult> GetUserById(int id)
         {
             IActionResult result;
 
             try
             {
-                User? user = _userService.GetUserById(id);
+                User? user = await _userService.GetUserByIdAsync(id);
 
                 if (user == null)
                 {
@@ -88,14 +88,14 @@ namespace MyAssignment.Controllers
         /// <param name="dto">The user data to create.</param>
         /// <returns>200 OK with the created user if valid; otherwise 400 Bad Request.</returns>
         [HttpPost]
-        public IActionResult CreateUser(UserDto dto)
+        public async Task<IActionResult> CreateUser(UserDto dto)
         {
             IActionResult result;
 
             try
             {
-                User user = _userService.CreateUser(dto);
-                result = Ok(MessagesConstants.UserCreated, user);
+                User user = await _userService.CreateUserAsync(dto);
+                result = Ok(ApiResponse<User>.SuccessResponse(MessagesConstants.UserCreated, user));
             }
             catch (Exception)
             {
@@ -111,13 +111,13 @@ namespace MyAssignment.Controllers
         /// <param name="id">The unique identifier of the user to delete.</param>
         /// <returns>200 OK with a confirmation message if deleted; otherwise 400 Bad Request.</returns>
         [HttpDelete("{id}")]
-        public IActionResult DeleteUser(int id)
+        public async Task<IActionResult> DeleteUser(int id)
         {
             IActionResult result;
 
             try
             {
-                bool deleted = _userService.DeleteUser(id);
+                bool deleted = await _userService.DeleteUserAsync(id);
 
                 if (!deleted)
                 {
@@ -143,13 +143,13 @@ namespace MyAssignment.Controllers
         /// <param name="dto">The new data to apply to the user.</param>
         /// <returns>200 OK with the updated user if valid; otherwise 400 Bad Request.</returns>
         [HttpPut("{id}")]
-        public IActionResult UpdateUser(int id, UserDto dto)
+        public async Task<IActionResult> UpdateUser(int id, UserDto dto)
         {
             IActionResult result;
 
             try
             {
-                User? user = _userService.UpdateUser(id, dto);
+                User? user = await _userService.UpdateUserAsync(id, dto);
 
                 if (user == null)
                 {
