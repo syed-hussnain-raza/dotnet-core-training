@@ -33,44 +33,44 @@ namespace MyAssignment.Services
         /// <summary>
         /// Retrieves all users from the database.
         /// </summary>
-        public List<User> GetAllUsers()
+        public async Task<List<User>> GetAllUsersAsync()
         {
-            List<User> users = _context.Users.AsNoTracking().ToList();
+            List<User> users = await _context.Users.AsNoTracking().ToListAsync();
             return users;
         }
 
         /// <summary>
         /// Retrieves a user by their unique identifier.
         /// </summary>
-        public User? GetUserById(int id)
+        public async Task<User?> GetUserByIdAsync(int id)
         {
-            User? user = FindUser(id);
+            User? user = await FindUserAsync(id);
             return user;
         }
 
         /// <summary>
         /// Creates a new user in the database based on the provided DTO.
         /// </summary>
-        public User CreateUser(UserDto dto)
+        public async Task<User> CreateUserAsync(UserDto dto)
         {
             User user = _mapper.Map<User>(dto);
             user.IsActive = true;
             _context.Users.Add(user);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return user;
         }
 
         /// <summary>
         /// Updates an existing user in the database based on the provided DTO.
         /// </summary>
-        public User? UpdateUser(int id, UserDto dto)
+        public async Task<User?> UpdateUserAsync(int id, UserDto dto)
         {
-            User? user = FindUser(id);
+            User? user = await FindUserAsync(id);
 
             if (user != null)
             {
                 _mapper.Map(dto, user);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
 
             return user;
@@ -79,15 +79,15 @@ namespace MyAssignment.Services
         /// <summary>
         /// Deletes a user from the database by their unique identifier.
         /// </summary>
-        public bool DeleteUser(int id)
+        public async Task<bool> DeleteUserAsync(int id)
         {
-            User? user = FindUser(id);
+            User? user = await FindUserAsync(id);
             bool deleted = false;
 
             if (user != null)
             {
                 _context.Users.Remove(user);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
                 deleted = true;
             }
 
@@ -97,11 +97,11 @@ namespace MyAssignment.Services
         // Private Helper Methods
 
         /// <summary>
-        /// Finds a user by their primary key. Uses EF Core's Find().
+        /// Finds a user by their primary key. Uses EF Core's FindAsync().
         /// </summary>
-        private User? FindUser(int id)
+        private async Task<User?> FindUserAsync(int id)
         {
-            User? user = _context.Users.Find(id);
+            User? user = await _context.Users.FindAsync(id);
             return user;
         }
     }
