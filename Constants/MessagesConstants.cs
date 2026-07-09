@@ -20,10 +20,6 @@ namespace MyAssignment.Constants
 
         // Error related messages (general)
         public const string UnexpectedError = "An unexpected error occurred while processing the request.";
-        
-        // Database related messages
-        public const string SaveFailed = "Could not save changes to the database.";
-        public const string ConcurrencyConflict = "This record was modified or deleted by another request.";
 
         // Authentication related messages
         public const string InvalidCredentials = "Invalid email or password.";

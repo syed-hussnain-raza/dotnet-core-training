@@ -1,4 +1,3 @@
-// Data/Configurations/UserConfiguration.cs
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MyAssignment.Constants;

@@ -41,7 +41,7 @@ namespace MyAssignment.Controllers
             try
             {
                 List<User> users = await _userService.GetAllUsersAsync();
-                result = Ok(ApiResponse<List<User>>.SuccessResponse(MessagesConstants.UsersFetched, users));
+                result = Ok(MessagesConstants.UsersFetched, users);
             }
             catch (Exception)
             {
@@ -95,7 +95,7 @@ namespace MyAssignment.Controllers
             try
             {
                 User user = await _userService.CreateUserAsync(dto);
-                result = Ok(ApiResponse<User>.SuccessResponse(MessagesConstants.UserCreated, user));
+                result = Ok(MessagesConstants.UserCreated, user);
             }
             catch (Exception)
             {
