@@ -1,123 +1,108 @@
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using MyAssignment.Data;
 using MyAssignment.Models;
 using MyAssignment.Dtos;
 
 namespace MyAssignment.Services
 {
     /// <summary>
-    /// Provides business logic for managing users, backed by an in-memory store.
+    /// Provides business logic for managing users, backed by EF Core - SQL Server.
     /// </summary>
     public class UserService : IUserService
     {
-        private readonly IMapper _mapper;
-        
         /// <summary>
-        /// In-memory list acting as a database
+        /// The database context for accessing user data.
         /// </summary>
-        private static List<User> _users = new List<User>
-        {
-            new User(1, "Hussnain", "hussnain@gmail.com", "03001234567", "Premium", true),
-            new User(2, "Hasnat", "hasnat@gmail.com", "03001234432", "Premium", true),
-            new User(3, "Ali", "ali@gmail.com", "03007654321", "Basic", true),
-            new User(4, "Sara", "sara@gmail.com", "03009876543", "Premium", false)
-        };
+        private readonly AppDbContext _context;
 
         /// <summary>
-        /// Creates a new UserService with the given AutoMapper instance injected.
+        /// The AutoMapper instance for mapping between DTOs and models.
         /// </summary>
-        /// <param name="mapper">AutoMapper instance used to map DTOs to domain models.</param>
-        public UserService(IMapper mapper)
+        private readonly IMapper _mapper;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserService"/> class.
+        /// </summary>
+        public UserService(AppDbContext context, IMapper mapper)
         {
+            _context = context;
             _mapper = mapper;
         }
 
         /// <summary>
-        /// Retrieves all users.
+        /// Retrieves all users from the database.
         /// </summary>
-        /// <returns>The full list of users.</returns>
-        public List<User> GetAllUsers()
+        public async Task<List<User>> GetAllUsersAsync()
         {
-            return _users;
+            List<User> users = await _context.Users.AsNoTracking().ToListAsync();
+            return users;
         }
 
         /// <summary>
-        /// Retrieves a single user by id.
+        /// Retrieves a user by their unique identifier.
         /// </summary>
-        /// <param name="id">The unique identifier to search for.</param>
-        /// <returns>The matching user, or null if none exists.</returns>
-        public User? GetUserById(int id)
+        public async Task<User?> GetUserByIdAsync(int id)
         {
-            User? user = FindUser(id);
+            User? user = await FindUserAsync(id);
             return user;
         }
 
         /// <summary>
-        /// Creates a new user from the given DTO.
+        /// Creates a new user in the database based on the provided DTO.
         /// </summary>
-        /// <param name="dto">The data used to create the user.</param>
-        /// <returns>The newly created user.</returns>
-        public User CreateUser(UserDto dto)
+        public async Task<User> CreateUserAsync(UserDto dto)
         {
             User user = _mapper.Map<User>(dto);
-            user.Id = GenerateId();
             user.IsActive = true;
-            _users.Add(user);
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
             return user;
         }
 
         /// <summary>
-        /// Updates an existing user with the given DTO's values.
+        /// Updates an existing user in the database based on the provided DTO.
         /// </summary>
-        /// <param name="id">The unique identifier of the user to update.</param>
-        /// <param name="dto">The new data to apply.</param>
-        /// <returns>The updated user, or null if no user with the given id exists.</returns>
-        public User? UpdateUser(int id, UserDto dto)
+        public async Task<User?> UpdateUserAsync(int id, UserDto dto)
         {
-            User? user = FindUser(id);
+            User? user = await FindUserAsync(id);
 
-            if (user == null)
+            if (user != null)
             {
-                return null;
+                _mapper.Map(dto, user);
+                await _context.SaveChangesAsync();
             }
 
-            _mapper.Map(dto, user);
             return user;
         }
 
         /// <summary>
-        /// Deletes a user by id.
+        /// Deletes a user from the database by their unique identifier.
         /// </summary>
-        /// <param name="id">The unique identifier of the user to delete.</param>
-        /// <returns>True if the user was found and deleted; otherwise false.</returns>
-        public bool DeleteUser(int id)
+        public async Task<bool> DeleteUserAsync(int id)
         {
-            User? user = FindUser(id);
+            User? user = await FindUserAsync(id);
+            bool deleted = false;
 
-            if (user == null)
+            if (user != null)
             {
-                return false;
+                _context.Users.Remove(user);
+                await _context.SaveChangesAsync();
+                deleted = true;
             }
 
-            _users.Remove(user);
-            return true;
+            return deleted;
         }
 
-        /// <summary>
-        /// Generates the next available user id. Safe on an empty list.
-        /// </summary>
-        /// <returns>A new unique id.</returns>
-        private int GenerateId()
-        {
-            int nextId = _users.Count == 0 ? 1 : _users.Max(u => u.Id) + 1;
-            return nextId;
-        }
+        // Private Helper Methods
 
         /// <summary>
-        /// Finds a user by id in the in-memory list.
+        /// Finds a user by their primary key. Uses EF Core's FindAsync().
         /// </summary>
-        private User? FindUser(int id)
+        private async Task<User?> FindUserAsync(int id)
         {
-            return _users.FirstOrDefault(u => u.Id == id);
+            User? user = await _context.Users.FindAsync(id);
+            return user;
         }
     }
 }

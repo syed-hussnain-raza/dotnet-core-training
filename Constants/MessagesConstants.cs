@@ -15,5 +15,7 @@ namespace MyAssignment.Constants
         public const string InvalidPhoneFormat = "Phone number format is invalid.";
         public const string InvalidMembershipType = "MembershipType must be either 'Basic' or 'Premium'.";
         public const string UnexpectedError = "An unexpected error occurred while processing the request.";
+        public const string SaveFailed = "Could not save changes to the database.";
+        public const string ConcurrencyConflict = "This record was modified or deleted by another request.";
     }
 }

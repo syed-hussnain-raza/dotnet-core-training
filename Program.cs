@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using MyAssignment.Helper;
 using MyAssignment.Services;
 using Asp.Versioning;
+using Microsoft.EntityFrameworkCore;
+using MyAssignment.Data;
 
 // Create the builder
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +13,10 @@ builder.Services.AddControllers(options =>
 {
     options.Filters.Add<ValidateModelStateFilter>();
 });
+
+// register the AppDbContext with SQL Server provider and connection string from configuration
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // disable the built-in automatic 400 response for invalid ModelState, so the
 // controller can check ModelState.IsValid itself and return validation
