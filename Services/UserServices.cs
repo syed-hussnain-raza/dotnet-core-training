@@ -1,8 +1,8 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MyAssignment.Data;
-using MyAssignment.Models;
 using MyAssignment.Dtos;
+using MyAssignment.Models;
 
 namespace MyAssignment.Services
 {
@@ -55,8 +55,11 @@ namespace MyAssignment.Services
         {
             User user = _mapper.Map<User>(dto);
             user.IsActive = true;
+
             _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+
+            await SaveAsync();
+
             return user;
         }
 
@@ -70,7 +73,7 @@ namespace MyAssignment.Services
             if (user != null)
             {
                 _mapper.Map(dto, user);
-                await _context.SaveChangesAsync();
+                await SaveAsync();
             }
 
             return user;
@@ -86,8 +89,8 @@ namespace MyAssignment.Services
 
             if (user != null)
             {
-                _context.Users.Remove(user);
-                await _context.SaveChangesAsync();
+            _context.Users.Remove(user);
+                await SaveAsync();
                 deleted = true;
             }
 
@@ -103,6 +106,14 @@ namespace MyAssignment.Services
         {
             User? user = await _context.Users.FindAsync(id);
             return user;
+        }
+
+        /// <summary>
+        /// Saves changes to the database asynchronously.
+        /// </summary>
+        private Task SaveAsync()
+        {
+            return _context.SaveChangesAsync();
         }
     }
 }
