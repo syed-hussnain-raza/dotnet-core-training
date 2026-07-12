@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using MyAssignment.Data;
 using MyAssignment.Extensions;
 using MyAssignment.Helper;
+using MyAssignment.Repositories;
 using MyAssignment.Services;
 
 // Create the builder
@@ -26,6 +27,9 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 // register the SQL Server database context via dependency injection
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// register the IUserRepository interface and its implementation UserRepository for dependency injection
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 // Identity (login/credentials) and JWT bearer authentication
 builder.Services.AddIdentityConfiguration();
