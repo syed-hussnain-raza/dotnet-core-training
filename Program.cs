@@ -7,6 +7,10 @@ using MyAssignment.Helper;
 using MyAssignment.Repositories;
 using MyAssignment.Services;
 
+// load .env into process environment variables before the builder reads
+// configuration, so Smtp__Password becomes available as Smtp:Password
+DotNetEnv.Env.Load(Path.Combine(Directory.GetCurrentDirectory(), ".env"));
+
 // Create the builder
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +34,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // register the IUserRepository interface and its implementation UserRepository for dependency injection
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+// register the email sender used for account confirmation emails
+builder.Services.AddEmailSender();
 
 // Identity (login/credentials) and JWT bearer authentication
 builder.Services.AddIdentityConfiguration();
@@ -55,7 +62,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 
 // register the IAuthService interface and its implementation AuthService for dependency injection
 builder.Services.AddScoped<IAuthService, AuthService>();
-    
+
 // register the JWT token generation service for dependency injection
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 

@@ -26,5 +26,11 @@ namespace MyAssignment.Constants
         public const string UserRegistered = "Account registered successfully.";
         public const string RegistrationFailed = "Registration failed.";
         public const string LoginSuccess = "Login successful.";
+
+        // Email confirmation
+        public const string EmailConfirmationFailed = "Email confirmation failed. The link may be invalid or expired.";
+        public const string EmailNotConfirmed = "Please confirm your email before logging in.";
+        public const string PasswordSetSuccess = "Password set successfully. You can now log in.";
+        public const string AlreadyHasPassword = "This account already has a password set.";
     }
 }

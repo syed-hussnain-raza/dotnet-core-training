@@ -1,50 +1,110 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using MyAssignment.Constants;
 using MyAssignment.Dtos;
 
 namespace MyAssignment.Services
 {
     /// <summary>
-    /// Provides business logic for account registration and login, backed
-    /// by ASP.NET Core Identity and JWT token generation.
+    /// Provides business logic for registration, email confirmation, and login.
     /// </summary>
     public class AuthService : IAuthService
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IJwtTokenService _jwtTokenService;
+        private readonly IEmailSender _emailSender;
+        private readonly IConfiguration _configuration;
 
-        public AuthService(UserManager<IdentityUser> userManager, IJwtTokenService jwtTokenService)
+        public AuthService(
+            UserManager<IdentityUser> userManager,
+            IJwtTokenService jwtTokenService,
+            IEmailSender emailSender,
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _jwtTokenService = jwtTokenService;
+            _emailSender = emailSender;
+            _configuration = configuration;
         }
 
-        /// <summary>
-        /// Creates a new Identity account and returns whether it succeeded,
-        /// along with a combined error message if it did not.
-        /// </summary>
         public async Task<(bool Succeeded, string ErrorMessage)> RegisterAsync(RegisterDto dto)
         {
             IdentityResult identityResult = await CreateIdentityUserAsync(dto);
-            string errorMessage = identityResult.Succeeded ? string.Empty : BuildErrorMessage(identityResult);
+            string errorMessage = string.Empty;
+
+            if (identityResult.Succeeded)
+            {
+                await SendConfirmationEmailAsync(dto.Email);
+            }
+            else
+            {
+                errorMessage = BuildErrorMessage(identityResult);
+            }
 
             return (identityResult.Succeeded, errorMessage);
         }
 
-        /// <summary>
-        /// Validates the given credentials and, if valid, generates a JWT
-        /// containing the user's id, email, and role claims.
-        /// </summary>
-        public async Task<(bool Succeeded, string Token)> LoginAsync(LoginDto dto)
+        public async Task<(bool Succeeded, string ErrorMessage)> ConfirmEmailAsync(ConfirmEmailDto dto)
         {
-            IdentityUser? identityUser = await ValidateCredentialsAsync(dto);
-            string token = string.Empty;
+            IdentityUser? identityUser = await _userManager.FindByEmailAsync(dto.Email);
+            bool succeeded = false;
+            string errorMessage = MessagesConstants.UserNotFound;
 
             if (identityUser != null)
             {
-                token = await GenerateTokenForUserAsync(identityUser);
+                bool alreadyHasPassword = await _userManager.HasPasswordAsync(identityUser);
+
+                if (alreadyHasPassword)
+                {
+                    errorMessage = MessagesConstants.AlreadyHasPassword;
+                }
+                else
+                {
+                    IdentityResult confirmResult = await _userManager.ConfirmEmailAsync(identityUser, dto.Token);
+
+                    if (!confirmResult.Succeeded)
+                    {
+                        errorMessage = MessagesConstants.EmailConfirmationFailed;
+                    }
+                    else
+                    {
+                        IdentityResult passwordResult = await _userManager.AddPasswordAsync(identityUser, dto.NewPassword);
+                        succeeded = passwordResult.Succeeded;
+                        errorMessage = succeeded ? string.Empty : BuildErrorMessage(passwordResult);
+                    }
+                }
             }
 
-            return (identityUser != null, token);
+            return (succeeded, errorMessage);
+        }
+
+        public async Task<(bool Succeeded, string Token, string ErrorMessage)> LoginAsync(LoginDto dto)
+        {
+            IdentityUser? identityUser = await _userManager.FindByEmailAsync(dto.Email);
+            bool succeeded = false;
+            string token = string.Empty;
+            string errorMessage = MessagesConstants.InvalidCredentials;
+
+            if (identityUser != null)
+            {
+                if (!identityUser.EmailConfirmed)
+                {
+                    errorMessage = MessagesConstants.EmailNotConfirmed;
+                }
+                else
+                {
+                    bool passwordValid = await _userManager.CheckPasswordAsync(identityUser, dto.Password);
+
+                    if (passwordValid)
+                    {
+                        token = await GenerateTokenForUserAsync(identityUser);
+                        succeeded = true;
+                        errorMessage = string.Empty;
+                    }
+                }
+            }
+
+            return (succeeded, token, errorMessage);
         }
 
         // Private Helper Methods
@@ -61,14 +121,31 @@ namespace MyAssignment.Services
                 Email = dto.Email
             };
 
-            IdentityResult identityResult = await _userManager.CreateAsync(identityUser, dto.Password);
+            // no password argument — account starts passwordless until confirmed
+            IdentityResult identityResult = await _userManager.CreateAsync(identityUser);
             return identityResult;
         }
 
-        /// <summary>
-        /// Joins all errors from a failed IdentityResult into a single
-        /// space-separated message.
-        /// </summary>
+        private async Task SendConfirmationEmailAsync(string email)
+        {
+            IdentityUser? identityUser = await _userManager.FindByEmailAsync(email);
+
+            if (identityUser != null)
+            {
+                string token = await _userManager.GenerateEmailConfirmationTokenAsync(identityUser);
+                string encodedToken = Uri.EscapeDataString(token);
+                string encodedEmail = Uri.EscapeDataString(email);
+
+                string baseUrl = _configuration["Frontend:ConfirmEmailUrl"] ?? string.Empty;
+                string confirmationLink = $"{baseUrl}?email={encodedEmail}&token={encodedToken}";
+
+                string body = $"<p>Welcome! Click the link below to confirm your email and set your password:</p>" +
+                              $"<p><a href=\"{confirmationLink}\">{confirmationLink}</a></p>";
+
+                await _emailSender.SendEmailAsync(email, "Confirm your account", body);
+            }
+        }
+
         private string BuildErrorMessage(IdentityResult identityResult)
         {
             string errorMessage = string.Join(" ", identityResult.Errors.Select(e => e.Description));
