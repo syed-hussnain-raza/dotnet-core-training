@@ -3,18 +3,9 @@
 namespace MyAssignment.Repositories
 {
     /// <summary>
-    /// Defines pure data-access operations for User entities.
+    /// User-specific data-access operations, on top of generic CRUD.
     /// </summary>
-    public interface IUserRepository
+    public interface IUserRepository : IGenericRepository<User>
     {
-        Task<List<User>> GetAllAsync();
-
-        Task<User?> GetByIdAsync(int id);
-
-        Task AddAsync(User user);
-
-        void Remove(User user);
-
-        Task<int> SaveChangesAsync();
     }
 }

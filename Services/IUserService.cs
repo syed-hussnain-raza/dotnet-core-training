@@ -1,5 +1,6 @@
 using MyAssignment.Models;
 using MyAssignment.Dtos;
+using MyAssignment.Helper;
 
 namespace MyAssignment.Services
 {
@@ -33,5 +34,10 @@ namespace MyAssignment.Services
         /// Deletes a user by id. Returns true if found and deleted.
         /// </summary>
         Task<bool> DeleteUserAsync(int id);
+
+        /// <summary>
+        /// Retrieves a paged, searchable, sortable list of users.
+        /// </summary>
+        Task<PagedResult<User>> GetUsersPagedAsync(QueryParameters parameters);
     }
 }

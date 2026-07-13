@@ -3,6 +3,7 @@ using MyAssignment.Models;
 using MyAssignment.Dtos;
 using MyAssignment.Services;
 using MyAssignment.Constants;
+using MyAssignment.Helper;
 using Asp.Versioning;
 
 namespace MyAssignment.Controllers
@@ -16,32 +17,31 @@ namespace MyAssignment.Controllers
     public class UserController : BaseApiController
     {
         /// <summary>
-        /// Service responsible for user business logic and data management.
+        /// Service responsible for user business logic.
         /// </summary>
         private readonly IUserService _userService;
 
         /// <summary>
-        /// Creates a new UserController with the given IUserService injected.
+        /// Initializes a new instance of the <see cref="UserController"/> class with the specified user service.
         /// </summary>
-        /// <param name="userService">Service handling user business logic.</param>
+        /// <param name="userService"></param>
         public UserController(IUserService userService)
         {
             _userService = userService;
         }
 
         /// <summary>
-        /// Retrieves all users.
+        /// Retrieves a paged, searchable, sortable list of users.
         /// </summary>
-        /// <returns>200 OK with the list of users.</returns>
         [HttpGet]
-        public async Task<IActionResult> GetAllUsers()
+        public async Task<IActionResult> GetAllUsers([FromQuery] QueryParameters parameters)
         {
             IActionResult result;
 
             try
             {
-                List<User> users = await _userService.GetAllUsersAsync();
-                result = Ok(MessagesConstants.UsersFetched, users);
+                PagedResult<User> pagedUsers = await _userService.GetUsersPagedAsync(parameters);
+                result = Ok(MessagesConstants.UsersFetched, pagedUsers);
             }
             catch (Exception)
             {

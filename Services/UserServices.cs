@@ -2,6 +2,8 @@ using AutoMapper;
 using MyAssignment.Dtos;
 using MyAssignment.Models;
 using MyAssignment.Repositories;
+using MyAssignment.Helper;
+using System.Linq.Expressions;
 
 namespace MyAssignment.Services
 {
@@ -68,6 +70,46 @@ namespace MyAssignment.Services
             }
 
             return deleted;
+        }
+
+        public async Task<PagedResult<User>> GetUsersPagedAsync(QueryParameters parameters)
+        {
+            Expression<Func<User, bool>>? filter = BuildFilter(parameters.SearchTerm);
+            Func<IQueryable<User>, IOrderedQueryable<User>>? orderBy = BuildOrderBy(parameters.SortBy, parameters.SortDescending);
+
+            (List<User> items, int totalCount) = await _userRepository.GetPagedAsync(
+                parameters.Page, parameters.PageSize, filter, orderBy);
+
+            return new PagedResult<User>(items, totalCount, parameters.Page, parameters.PageSize);
+        }
+
+        // Private Helper Methods
+        private Expression<Func<User, bool>>? BuildFilter(string? searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                return null;
+            }
+
+            return u => u.FullName.Contains(searchTerm) || u.Email.Contains(searchTerm);
+        }
+
+        // Maps a sort field name from the query string to the actual property.
+        // Unrecognized values fall back to sorting by Id rather than throwing.
+        private Func<IQueryable<User>, IOrderedQueryable<User>>? BuildOrderBy(string? sortBy, bool descending)
+        {
+            if (string.IsNullOrWhiteSpace(sortBy))
+            {
+                return q => q.OrderBy(u => u.Id);
+            }
+
+            return sortBy.ToLower() switch
+            {
+                "fullname" => q => descending ? q.OrderByDescending(u => u.FullName) : q.OrderBy(u => u.FullName),
+                "email" => q => descending ? q.OrderByDescending(u => u.Email) : q.OrderBy(u => u.Email),
+                "membershiptype" => q => descending ? q.OrderByDescending(u => u.MembershipType) : q.OrderBy(u => u.MembershipType),
+                _ => q => q.OrderBy(u => u.Id)
+            };
         }
     }
 }

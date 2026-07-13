@@ -55,7 +55,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 
 // register the IAuthService interface and its implementation AuthService for dependency injection
 builder.Services.AddScoped<IAuthService, AuthService>();
-
+    
 // register the JWT token generation service for dependency injection
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
