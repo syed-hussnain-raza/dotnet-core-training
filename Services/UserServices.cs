@@ -43,7 +43,7 @@ namespace MyAssignment.Services
         /// <summary>
         /// Retrieves a user by their unique identifier. Throws an exception if not found.
         /// </summary>
-        public async Task<User> GetUserByIdAsync(int id)
+        public async Task<User> GetUserByIdAsync(string id)
         {
             User? user = await FindUserAsync(id);
             if (user == null)
@@ -73,6 +73,7 @@ namespace MyAssignment.Services
         {
             User user = _mapper.Map<User>(dto);
             user.IsActive = true;
+            user.UserName = dto.FirstName + dto.LastName;
 
             _context.Users.Add(user);
 
@@ -84,7 +85,7 @@ namespace MyAssignment.Services
         /// <summary>
         /// Updates an existing user in the database based on the provided DTO. Throws an exception if not found.
         /// </summary>
-        public async Task<User> UpdateUserAsync(int id, UserDto dto)
+        public async Task<User> UpdateUserAsync(string id, UserDto dto)
         {
             User? user = await FindUserAsync(id);
 
@@ -94,6 +95,7 @@ namespace MyAssignment.Services
             }
 
             _mapper.Map(dto, user);
+            user.UserName = dto.FirstName + dto.LastName;
             await SaveAsync();
 
             return user;
@@ -102,7 +104,7 @@ namespace MyAssignment.Services
         /// <summary>
         /// Deletes a user from the database by their unique identifier. Throws an exception if not found.
         /// </summary>
-        public async Task DeleteUserAsync(int id)
+        public async Task DeleteUserAsync(string id)
         {
             User? user = await FindUserAsync(id);
 
@@ -120,7 +122,7 @@ namespace MyAssignment.Services
         /// <summary>
         /// Finds a user by their primary key. Uses EF Core's FindAsync().
         /// </summary>
-        private async Task<User?> FindUserAsync(int id)
+        private async Task<User?> FindUserAsync(string id)
         {
             User? user = await _context.Users.FindAsync(id);
             return user;

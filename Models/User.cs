@@ -1,18 +1,12 @@
-using System.ComponentModel.DataAnnotations;
-using MyAssignment.Constants;
+using Microsoft.AspNetCore.Identity;
 
 namespace MyAssignment.Models
 {
     /// <summary>
     /// Represents a single User in the system.
     /// </summary>
-    public class User
+    public class User : IdentityUser
     {
-        /// <summary>
-        /// Unique identifier of the user. Server-generated.
-        /// </summary>
-        public int Id { get; set; }
-
         /// <summary>
         /// First name of the user.
         /// </summary>
@@ -24,19 +18,9 @@ namespace MyAssignment.Models
         public string LastName { get; set; } = string.Empty;
 
         /// <summary>
-        /// Email address of the user.
-        /// </summary>
-        public string Email { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Contact phone number of the user.
-        /// </summary>
-        public string PhoneNumber { get; set; } = string.Empty;
-
-        /// <summary>
         /// Date of birth of the user.
         /// </summary>
-        public DateTime? DateOfBirth { get; set; }
+        public DateOnly DateOfBirth { get; set; }
 
         /// <summary>
         /// Address of the user.
@@ -62,12 +46,12 @@ namespace MyAssignment.Models
         /// <summary>
         /// Creates a new User with all fields.
         /// </summary>
-        public User(int id, string firstName, string lastName, string email, string phoneNumber, DateTime? dateOfBirth = null, string address = "", string membershipType = "Basic", bool isActive = true)
+        public User(string firstName, string lastName, string email, string phoneNumber, DateOnly dateOfBirth, string address = "", string membershipType = "Basic", bool isActive = true)
         {
-            Id = id;
+            UserName = firstName + lastName;
+            Email = email;
             FirstName = firstName;
             LastName = lastName;
-            Email = email;
             PhoneNumber = phoneNumber;
             DateOfBirth = dateOfBirth;
             Address = address;

@@ -58,7 +58,7 @@ namespace MyAssignment.Controllers
         /// <param name="id">The unique identifier of the user.</param>
         /// <returns>200 OK with the user if found; otherwise 400 Bad Request.</returns>
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserById(int id)
+        public async Task<IActionResult> GetUserById(string id)
         {
             IActionResult result;
 
@@ -104,7 +104,7 @@ namespace MyAssignment.Controllers
         /// <param name="id">The unique identifier of the user to delete.</param>
         /// <returns>200 OK with a confirmation message if deleted; otherwise 400 Bad Request.</returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
+        public async Task<IActionResult> DeleteUser(string id)
         {
             IActionResult result;
 
@@ -128,7 +128,7 @@ namespace MyAssignment.Controllers
         /// <param name="dto">The new data to apply to the user.</param>
         /// <returns>200 OK with the updated user if valid; otherwise 400 Bad Request.</returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, UserDto dto)
+        public async Task<IActionResult> UpdateUser(string id, UserDto dto)
         {
             IActionResult result;
 

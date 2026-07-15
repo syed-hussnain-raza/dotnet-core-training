@@ -9,7 +9,7 @@ namespace MyAssignment.Data
     /// EF Core database context for the application. Inherits from
     /// IdentityDbContext to add ASP.NET Core Identity's own tables
     /// </summary>
-    public class AppDbContext : IdentityDbContext<IdentityUser>
+    public class AppDbContext : IdentityDbContext<User>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AppDbContext"/> class.
@@ -20,11 +20,6 @@ namespace MyAssignment.Data
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
-
-        /// <summary>
-        /// Represents the Users table in the database. This is a DbSet of User entities.
-        /// </summary>
-        public new DbSet<User> Users { get; set; } = null!;
 
         /// <summary>
         /// Applies all entity configurations from the current assembly.

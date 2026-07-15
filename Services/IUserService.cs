@@ -16,7 +16,7 @@ namespace MyAssignment.Services
         /// <summary>
         /// Retrieves a single user by id. Throws an exception if none exists.
         /// </summary>
-        Task<User> GetUserByIdAsync(int id);
+        Task<User> GetUserByIdAsync(string id);
 
         /// <summary>
         /// Retrieves a single user by email. Throws an exception if none exists.
@@ -31,11 +31,11 @@ namespace MyAssignment.Services
         /// <summary>
         /// Updates an existing user with the given DTO's values. Throws an exception if no matching user exists.
         /// </summary>
-        Task<User> UpdateUserAsync(int id, UserDto dto);
+        Task<User> UpdateUserAsync(string id, UserDto dto);
 
         /// <summary>
         /// Deletes a user by id. Throws an exception if no matching user exists.
         /// </summary>
-        Task DeleteUserAsync(int id);
+        Task DeleteUserAsync(string id);
     }
 }

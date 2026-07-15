@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using MyAssignment.Constants;
 using MyAssignment.Dtos;
+using AutoMapper;
 
 namespace MyAssignment.Services
 {
@@ -10,15 +11,15 @@ namespace MyAssignment.Services
     /// </summary>
     public class AuthService : IAuthService
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<Models.User> _userManager;
         private readonly IJwtTokenService _jwtTokenService;
-        private readonly IUserService _userService;
+        private readonly IMapper _mapper;
 
-        public AuthService(UserManager<IdentityUser> userManager, IJwtTokenService jwtTokenService, IUserService userService)
+        public AuthService(UserManager<Models.User> userManager, IJwtTokenService jwtTokenService, IMapper mapper)
         {
             _userManager = userManager;
             _jwtTokenService = jwtTokenService;
-            _userService = userService;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -26,25 +27,14 @@ namespace MyAssignment.Services
         /// </summary>
         public async Task RegisterAsync(RegisterDto dto)
         {
-            IdentityResult identityResult = await CreateIdentityUserAsync(dto);
+            Models.User user = new Models.User(dto.FirstName, dto.LastName, dto.Email, dto.PhoneNumber, dto.DateOfBirth, dto.Address);
+            
+            IdentityResult identityResult = await _userManager.CreateAsync(user, dto.Password);
             
             if (!identityResult.Succeeded)
             {
-                string errorMessage = BuildErrorMessage(identityResult);
-                throw new Exception(errorMessage);
+                throw new Exception(MessagesConstants.RegistrationFailed);
             }
-
-            UserDto userDto = new UserDto
-            {
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                Email = dto.Email,
-                PhoneNumber = dto.PhoneNumber,
-                DateOfBirth = dto.DateOfBirth,
-                Address = dto.Address
-            };
-            
-            await _userService.CreateUserAsync(userDto);
         }
 
         /// <summary>
@@ -52,27 +42,16 @@ namespace MyAssignment.Services
         /// </summary>
         public async Task<LoginResponseDto> LoginAsync(LoginDto dto)
         {
-            IdentityUser? identityUser = await ValidateCredentialsAsync(dto);
+            Models.User? user = await ValidateCredentialsAsync(dto);
 
-            if (identityUser == null)
+            if (user == null)
             {
                 throw new Exception(MessagesConstants.InvalidCredentials);
             }
 
-            string token = await GenerateTokenForUserAsync(identityUser);
+            string token = await GenerateTokenForUserAsync(user);
             
-            Models.User userDetails = await _userService.GetUserByEmailAsync(dto.Email);
-            
-            UserDto userDto = new UserDto
-            {
-                FirstName = userDetails.FirstName,
-                LastName = userDetails.LastName,
-                Email = userDetails.Email,
-                PhoneNumber = userDetails.PhoneNumber,
-                DateOfBirth = userDetails.DateOfBirth,
-                Address = userDetails.Address,
-                MembershipType = userDetails.MembershipType
-            };
+            UserDto userDto = _mapper.Map<UserDto>(user);
 
             return new LoginResponseDto
             {
@@ -83,41 +62,26 @@ namespace MyAssignment.Services
 
         // Private Helper Methods
 
-        /// <summary>
-        /// Creates a new Identity account. Username is set equal to email,
-        /// since this system does not use a separate username concept.
-        /// </summary>
-        private async Task<IdentityResult> CreateIdentityUserAsync(RegisterDto dto)
-        {
-            IdentityUser identityUser = new IdentityUser
-            {
-                UserName = dto.Email,
-                Email = dto.Email
-            };
 
-            IdentityResult identityResult = await _userManager.CreateAsync(identityUser, dto.Password);
-            return identityResult;
-        }
 
         /// <summary>
-        /// Joins all errors from a failed IdentityResult into a single
-        /// space-separated message.
-        /// </summary>
-        private string BuildErrorMessage(IdentityResult identityResult)
-        {
-            string errorMessage = string.Join(" ", identityResult.Errors.Select(e => e.Description));
-            return errorMessage;
-        }
-
-        /// <summary>
-        /// Looks up a user by email and validates the given password.
+        /// Looks up a user by username and validates the given password.
         /// Returns the matched user if credentials are valid, otherwise null.
         /// </summary>
-        private async Task<IdentityUser?> ValidateCredentialsAsync(LoginDto dto)
+        private async Task<Models.User?> ValidateCredentialsAsync(LoginDto dto)
         {
-            IdentityUser? identityUser = await _userManager.FindByEmailAsync(dto.Email);
-            bool passwordValid = identityUser != null && await _userManager.CheckPasswordAsync(identityUser, dto.Password);
-            IdentityUser? validatedUser = passwordValid ? identityUser : null;
+            Models.User? validatedUser = null;
+            Models.User? user = await _userManager.FindByNameAsync(dto.UserName);
+            
+            if (user != null)
+            {
+                bool isPasswordValid = await _userManager.CheckPasswordAsync(user, dto.Password);
+                
+                if (isPasswordValid)
+                {
+                    validatedUser = user;
+                }
+            }
 
             return validatedUser;
         }
@@ -126,10 +90,10 @@ namespace MyAssignment.Services
         /// Fetches the user's assigned roles and generates a signed JWT
         /// embedding them as claims.
         /// </summary>
-        private async Task<string> GenerateTokenForUserAsync(IdentityUser identityUser)
+        private async Task<string> GenerateTokenForUserAsync(Models.User user)
         {
-            IList<string> roles = await _userManager.GetRolesAsync(identityUser);
-            string token = _jwtTokenService.GenerateToken(identityUser, roles);
+            IList<string> roles = await _userManager.GetRolesAsync(user);
+            string token = _jwtTokenService.GenerateToken(user, roles);
 
             return token;
         }

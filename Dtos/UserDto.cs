@@ -37,7 +37,8 @@ namespace MyAssignment.Dtos
         /// <summary>
         /// Date of birth of the user.
         /// </summary>
-        public DateTime? DateOfBirth { get; set; }
+        [Required]
+        public DateOnly DateOfBirth { get; set; }
 
         /// <summary>
         /// Address of the user.

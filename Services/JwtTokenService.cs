@@ -25,7 +25,7 @@ namespace MyAssignment.Services
         /// Builds a JWT containing the user's id, email, a unique token
         /// identifier (jti), and one claim per assigned role.
         /// </summary>
-        public string GenerateToken(IdentityUser user, IList<string> roles)
+        public string GenerateToken(Models.User user, IList<string> roles)
         {
             List<Claim> claims = new List<Claim>
             {

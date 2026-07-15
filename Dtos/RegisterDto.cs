@@ -24,7 +24,8 @@ namespace MyAssignment.Dtos
         [RegularExpression(@"^03\d{9}$", ErrorMessage = "Invalid phone number format.")]
         public string PhoneNumber { get; set; } = string.Empty;
 
-        public DateTime? DateOfBirth { get; set; }
+        [Required]
+        public DateOnly DateOfBirth { get; set; }
 
         public string Address { get; set; } = string.Empty;
     }
