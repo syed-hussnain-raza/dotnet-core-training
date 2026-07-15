@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using MyAssignment.Helper;
 
-namespace MyAssignment.Controllers
+namespace MyAssignment.Shared
+
 {
     /// <summary>
     /// Base controller for API endpoints, providing standardized response handling.
