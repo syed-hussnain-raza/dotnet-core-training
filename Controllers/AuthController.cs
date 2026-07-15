@@ -9,7 +9,7 @@ using MyAssignment.Shared;
 namespace MyAssignment.Controllers
 {
     /// <summary>
-    /// Controller for handling user authentication, including registration and login.
+        /// Controller for handling user authentication, including registration and login.
     /// </summary>
     [ApiController]
     [ApiVersion(ApiVersionsConstants.V1)]
