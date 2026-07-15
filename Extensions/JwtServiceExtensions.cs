@@ -1,7 +1,7 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using MyAssignment.Models;
+using MyAssignment.Options;
 
 namespace MyAssignment.Extensions
 {

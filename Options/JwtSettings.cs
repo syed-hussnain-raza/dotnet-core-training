@@ -1,4 +1,4 @@
-namespace MyAssignment.Models
+namespace MyAssignment.Options
 {
     public class JwtSettings
     {

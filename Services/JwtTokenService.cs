@@ -4,7 +4,7 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using MyAssignment.Models;
+using MyAssignment.Options;
 
 namespace MyAssignment.Services
 {
