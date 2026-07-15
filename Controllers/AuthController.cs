@@ -43,7 +43,6 @@ namespace MyAssignment.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[DEBUG] Register failed: {ex}");
                 result = BadRequest(MessagesConstants.UnexpectedError);
             }
 
