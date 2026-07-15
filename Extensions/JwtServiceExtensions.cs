@@ -18,10 +18,6 @@ namespace MyAssignment.Extensions
             var jwtSettings = new JwtSettings();
             configuration.GetSection("Jwt").Bind(jwtSettings);
 
-            string jwtKey = jwtSettings.Key;
-            string jwtIssuer = jwtSettings.Issuer;
-            string jwtAudience = jwtSettings.Audience;
-
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -35,9 +31,9 @@ namespace MyAssignment.Extensions
                         ValidateAudience = true,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuer = jwtIssuer,
-                        ValidAudience = jwtAudience,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+                        ValidIssuer = jwtSettings.Issuer,
+                        ValidAudience = jwtSettings.Audience,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key))
                     };
                 });
 
