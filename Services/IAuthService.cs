@@ -15,6 +15,6 @@ namespace MyAssignment.Services
         /// <summary>
         /// Validates credentials and issues a JWT on success. Throws an exception if it fails.
         /// </summary>
-        Task<string> LoginAsync(LoginDto dto);
+        Task<LoginResponseDto> LoginAsync(LoginDto dto);
     }
 }

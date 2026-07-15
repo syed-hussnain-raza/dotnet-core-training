@@ -54,6 +54,19 @@ namespace MyAssignment.Services
         }
 
         /// <summary>
+        /// Retrieves a user by their email address. Throws an exception if not found.
+        /// </summary>
+        public async Task<User> GetUserByEmailAsync(string email)
+        {
+            User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null)
+            {
+                throw new Exception(MessagesConstants.UserNotFound);
+            }
+            return user;
+        }
+
+        /// <summary>
         /// Creates a new user in the database based on the provided DTO.
         /// </summary>
         public async Task<User> CreateUserAsync(UserDto dto)

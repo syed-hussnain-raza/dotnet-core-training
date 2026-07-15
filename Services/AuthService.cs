@@ -50,7 +50,7 @@ namespace MyAssignment.Services
         /// <summary>
         /// Validates the given credentials and generates a JWT. Throws an exception if invalid.
         /// </summary>
-        public async Task<string> LoginAsync(LoginDto dto)
+        public async Task<LoginResponseDto> LoginAsync(LoginDto dto)
         {
             IdentityUser? identityUser = await ValidateCredentialsAsync(dto);
 
@@ -60,7 +60,25 @@ namespace MyAssignment.Services
             }
 
             string token = await GenerateTokenForUserAsync(identityUser);
-            return token;
+            
+            Models.User userDetails = await _userService.GetUserByEmailAsync(dto.Email);
+            
+            UserDto userDto = new UserDto
+            {
+                FirstName = userDetails.FirstName,
+                LastName = userDetails.LastName,
+                Email = userDetails.Email,
+                PhoneNumber = userDetails.PhoneNumber,
+                DateOfBirth = userDetails.DateOfBirth,
+                Address = userDetails.Address,
+                MembershipType = userDetails.MembershipType
+            };
+
+            return new LoginResponseDto
+            {
+                Token = token,
+                User = userDto
+            };
         }
 
         // Private Helper Methods

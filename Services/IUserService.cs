@@ -19,6 +19,11 @@ namespace MyAssignment.Services
         Task<User> GetUserByIdAsync(int id);
 
         /// <summary>
+        /// Retrieves a single user by email. Throws an exception if none exists.
+        /// </summary>
+        Task<User> GetUserByEmailAsync(string email);
+
+        /// <summary>
         /// Creates a new user from the given DTO.
         /// </summary>
         Task<User> CreateUserAsync(UserDto dto);

@@ -66,8 +66,8 @@ namespace MyAssignment.Controllers
 
             try
             {
-                string token = await _authService.LoginAsync(dto);
-                result = Ok(MessagesConstants.LoginSuccess, token);
+                LoginResponseDto response = await _authService.LoginAsync(dto);
+                result = Ok(MessagesConstants.LoginSuccess, response);
             }
             catch (Exception ex)
             {
