@@ -39,20 +39,12 @@ namespace MyAssignment.Controllers
 
             try
             {
-                (bool succeeded, string errorMessage) = await _authService.RegisterAsync(dto);
-
-                if (succeeded)
-                {
-                    result = Ok<object>(MessagesConstants.UserRegistered, default);
-                }
-                else
-                {
-                    result = BadRequest(errorMessage.Length > 0 ? errorMessage : MessagesConstants.RegistrationFailed);
-                }
+                await _authService.RegisterAsync(dto);
+                result = Ok<object>(MessagesConstants.UserRegistered, default);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                result = BadRequest(MessagesConstants.UnexpectedError);
+                result = BadRequest(ex.Message);
             }
 
             return result;
@@ -70,20 +62,12 @@ namespace MyAssignment.Controllers
 
             try
             {
-                (bool succeeded, string token) = await _authService.LoginAsync(dto);
-
-                if (succeeded)
-                {
-                    result = Ok(MessagesConstants.LoginSuccess, token);
-                }
-                else
-                {
-                    result = BadRequest(MessagesConstants.InvalidCredentials);
-                }
+                string token = await _authService.LoginAsync(dto);
+                result = Ok(MessagesConstants.LoginSuccess, token);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                result = BadRequest(MessagesConstants.UnexpectedError);
+                result = BadRequest(ex.Message);
             }
 
             return result;

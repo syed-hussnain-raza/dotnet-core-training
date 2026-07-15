@@ -8,15 +8,13 @@ namespace MyAssignment.Services
     public interface IAuthService
     {
         /// <summary>
-        /// Registers a new login account. Returns whether it succeeded and,
-        /// if not, a combined error message describing why.
+        /// Registers a new login account. Throws an exception if it fails.
         /// </summary>
-        Task<(bool Succeeded, string ErrorMessage)> RegisterAsync(RegisterDto dto);
+        Task RegisterAsync(RegisterDto dto);
 
         /// <summary>
-        /// Validates credentials and issues a JWT on success. Returns whether
-        /// it succeeded and, if so, the generated token.
+        /// Validates credentials and issues a JWT on success. Throws an exception if it fails.
         /// </summary>
-        Task<(bool Succeeded, string Token)> LoginAsync(LoginDto dto);
+        Task<string> LoginAsync(LoginDto dto);
     }
 }

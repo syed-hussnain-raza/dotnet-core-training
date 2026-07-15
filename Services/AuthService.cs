@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using MyAssignment.Constants;
 using MyAssignment.Dtos;
 
 namespace MyAssignment.Services
@@ -19,32 +20,33 @@ namespace MyAssignment.Services
         }
 
         /// <summary>
-        /// Creates a new Identity account and returns whether it succeeded,
-        /// along with a combined error message if it did not.
+        /// Creates a new Identity account. Throws an exception with the error message if it fails.
         /// </summary>
-        public async Task<(bool Succeeded, string ErrorMessage)> RegisterAsync(RegisterDto dto)
+        public async Task RegisterAsync(RegisterDto dto)
         {
             IdentityResult identityResult = await CreateIdentityUserAsync(dto);
-            string errorMessage = identityResult.Succeeded ? string.Empty : BuildErrorMessage(identityResult);
-
-            return (identityResult.Succeeded, errorMessage);
+            
+            if (!identityResult.Succeeded)
+            {
+                string errorMessage = BuildErrorMessage(identityResult);
+                throw new Exception(errorMessage);
+            }
         }
 
         /// <summary>
-        /// Validates the given credentials and, if valid, generates a JWT
-        /// containing the user's id, email, and role claims.
+        /// Validates the given credentials and generates a JWT. Throws an exception if invalid.
         /// </summary>
-        public async Task<(bool Succeeded, string Token)> LoginAsync(LoginDto dto)
+        public async Task<string> LoginAsync(LoginDto dto)
         {
             IdentityUser? identityUser = await ValidateCredentialsAsync(dto);
-            string token = string.Empty;
 
-            if (identityUser != null)
+            if (identityUser == null)
             {
-                token = await GenerateTokenForUserAsync(identityUser);
+                throw new Exception(MessagesConstants.InvalidCredentials);
             }
 
-            return (identityUser != null, token);
+            string token = await GenerateTokenForUserAsync(identityUser);
+            return token;
         }
 
         // Private Helper Methods

@@ -43,9 +43,9 @@ namespace MyAssignment.Controllers
                 List<User> users = await _userService.GetAllUsersAsync();
                 result = Ok(MessagesConstants.UsersFetched, users);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                result = BadRequest(MessagesConstants.UnexpectedError);
+                result = BadRequest(ex.Message);
             }
 
             return result;
@@ -63,20 +63,12 @@ namespace MyAssignment.Controllers
 
             try
             {
-                User? user = await _userService.GetUserByIdAsync(id);
-
-                if (user == null)
-                {
-                    result = BadRequest(MessagesConstants.UserNotFound);
-                }
-                else
-                {
-                    result = Ok(MessagesConstants.UserFetched, user);
-                }
+                User user = await _userService.GetUserByIdAsync(id);
+                result = Ok(MessagesConstants.UserFetched, user);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                result = BadRequest(MessagesConstants.UnexpectedError);
+                result = BadRequest(ex.Message);
             }
 
             return result;
@@ -97,9 +89,9 @@ namespace MyAssignment.Controllers
                 User user = await _userService.CreateUserAsync(dto);
                 result = Ok(MessagesConstants.UserCreated, user);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                result = BadRequest(MessagesConstants.UnexpectedError);
+                result = BadRequest(ex.Message);
             }
 
             return result;
@@ -117,20 +109,12 @@ namespace MyAssignment.Controllers
 
             try
             {
-                bool deleted = await _userService.DeleteUserAsync(id);
-
-                if (!deleted)
-                {
-                    result = BadRequest(MessagesConstants.UserNotFound);
-                }
-                else
-                {
-                    result = Ok<object>(MessagesConstants.UserDeleted, default);
-                }
+                await _userService.DeleteUserAsync(id);
+                result = Ok<object>(MessagesConstants.UserDeleted, default);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                result = BadRequest(MessagesConstants.UnexpectedError);
+                result = BadRequest(ex.Message);
             }
 
             return result;
@@ -149,20 +133,12 @@ namespace MyAssignment.Controllers
 
             try
             {
-                User? user = await _userService.UpdateUserAsync(id, dto);
-
-                if (user == null)
-                {
-                    result = BadRequest(MessagesConstants.UserNotFound);
-                }
-                else
-                {
-                    result = Ok(MessagesConstants.UserUpdated, user);
-                }
+                User user = await _userService.UpdateUserAsync(id, dto);
+                result = Ok(MessagesConstants.UserUpdated, user);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                result = BadRequest(MessagesConstants.UnexpectedError);
+                result = BadRequest(ex.Message);
             }
 
             return result;

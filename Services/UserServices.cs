@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using MyAssignment.Constants;
 using MyAssignment.Data;
 using MyAssignment.Dtos;
 using MyAssignment.Models;
@@ -40,11 +41,15 @@ namespace MyAssignment.Services
         }
 
         /// <summary>
-        /// Retrieves a user by their unique identifier.
+        /// Retrieves a user by their unique identifier. Throws an exception if not found.
         /// </summary>
-        public async Task<User?> GetUserByIdAsync(int id)
+        public async Task<User> GetUserByIdAsync(int id)
         {
             User? user = await FindUserAsync(id);
+            if (user == null)
+            {
+                throw new Exception(MessagesConstants.UserNotFound);
+            }
             return user;
         }
 
@@ -64,37 +69,37 @@ namespace MyAssignment.Services
         }
 
         /// <summary>
-        /// Updates an existing user in the database based on the provided DTO.
+        /// Updates an existing user in the database based on the provided DTO. Throws an exception if not found.
         /// </summary>
-        public async Task<User?> UpdateUserAsync(int id, UserDto dto)
+        public async Task<User> UpdateUserAsync(int id, UserDto dto)
         {
             User? user = await FindUserAsync(id);
 
-            if (user != null)
+            if (user == null)
             {
-                _mapper.Map(dto, user);
-                await SaveAsync();
+                throw new Exception(MessagesConstants.UserNotFound);
             }
+
+            _mapper.Map(dto, user);
+            await SaveAsync();
 
             return user;
         }
 
         /// <summary>
-        /// Deletes a user from the database by their unique identifier.
+        /// Deletes a user from the database by their unique identifier. Throws an exception if not found.
         /// </summary>
-        public async Task<bool> DeleteUserAsync(int id)
+        public async Task DeleteUserAsync(int id)
         {
             User? user = await FindUserAsync(id);
-            bool deleted = false;
 
-            if (user != null)
+            if (user == null)
             {
-            _context.Users.Remove(user);
-                await SaveAsync();
-                deleted = true;
+                throw new Exception(MessagesConstants.UserNotFound);
             }
 
-            return deleted;
+            _context.Users.Remove(user);
+            await SaveAsync();
         }
 
         // Private Helper Methods
