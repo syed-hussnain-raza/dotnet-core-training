@@ -20,6 +20,7 @@ namespace MyAssignment.Constants
 
         // Error related messages (general)
         public const string UnexpectedError = "An unexpected error occurred while processing the request.";
+        public const string ValidationError = "Validation Failed";
 
         // Authentication related messages
         public const string InvalidCredentials = "Invalid email or password.";
