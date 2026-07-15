@@ -14,7 +14,6 @@ namespace MyAssignment.Controllers
     [ApiController]
     [ApiVersion(ApiVersionsConstants.V1)]
     [Route(ApiRoutesConstants.Auth)]
-    [AllowAnonymous]
     public class AuthController : BaseApiController
     {
         private readonly IAuthService _authService;
@@ -33,7 +32,10 @@ namespace MyAssignment.Controllers
         /// </summary>
         /// <param name="dto">Email and password for the new account.</param>
         /// <returns>200 OK if registered; otherwise 400 Bad Request.</returns>
+
+        // There should be one admin that can add users, this admin is added manually in the database, and the admin can add users via the Register endpoint
         [HttpPost(ApiRoutesConstants.Register)]
+        [Authorize(Roles = RolesConstants.Admin)]
         public async Task<IActionResult> Register(RegisterDto dto)
         {
             IActionResult result;
@@ -57,6 +59,7 @@ namespace MyAssignment.Controllers
         /// <param name="dto">Login credentials.</param>
         /// <returns>200 OK with a JWT if valid; otherwise 400 Bad Request.</returns>
         [HttpPost(ApiRoutesConstants.Login)]
+        [AllowAnonymous]
         public async Task<IActionResult> Login(LoginDto dto)
         {
             IActionResult result;
