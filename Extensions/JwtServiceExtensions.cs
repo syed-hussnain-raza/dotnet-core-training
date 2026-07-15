@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using MyAssignment.Models;
 
 namespace MyAssignment.Extensions
 {
@@ -14,9 +15,12 @@ namespace MyAssignment.Extensions
         /// <returns></returns>
         public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
-            string jwtKey = configuration["Jwt:Key"] ?? string.Empty;
-            string jwtIssuer = configuration["Jwt:Issuer"] ?? string.Empty;
-            string jwtAudience = configuration["Jwt:Audience"] ?? string.Empty;
+            var jwtSettings = new JwtSettings();
+            configuration.GetSection("Jwt").Bind(jwtSettings);
+
+            string jwtKey = jwtSettings.Key;
+            string jwtIssuer = jwtSettings.Issuer;
+            string jwtAudience = jwtSettings.Audience;
 
             services.AddAuthentication(options =>
             {

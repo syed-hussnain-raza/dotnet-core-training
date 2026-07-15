@@ -29,6 +29,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Identity (login/credentials) and JWT bearer authentication
 builder.Services.AddIdentityConfiguration();
+builder.Services.Configure<MyAssignment.Models.JwtSettings>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 // fallback authorization policy: every endpoint requires an authenticated

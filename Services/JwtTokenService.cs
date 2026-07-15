@@ -2,8 +2,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using MyAssignment.Models;
 
 namespace MyAssignment.Services
 {
@@ -13,11 +14,11 @@ namespace MyAssignment.Services
     /// </summary>
     public class JwtTokenService : IJwtTokenService
     {
-        private readonly IConfiguration _configuration;
+        private readonly JwtSettings _jwtSettings;
 
-        public JwtTokenService(IConfiguration configuration)
+        public JwtTokenService(IOptions<JwtSettings> jwtOptions)
         {
-            _configuration = configuration;
+            _jwtSettings = jwtOptions.Value;
         }
 
         /// <summary>
@@ -38,10 +39,10 @@ namespace MyAssignment.Services
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
 
-            string key = _configuration["Jwt:Key"] ?? string.Empty;
-            string issuer = _configuration["Jwt:Issuer"] ?? string.Empty;
-            string audience = _configuration["Jwt:Audience"] ?? string.Empty;
-            int expiryMinutes = int.Parse(_configuration["Jwt:ExpiryMinutes"] ?? "60");
+            string key = _jwtSettings.Key;
+            string issuer = _jwtSettings.Issuer;
+            string audience = _jwtSettings.Audience;
+            int expiryMinutes = _jwtSettings.ExpiryMinutes;
 
             SymmetricSecurityKey signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             SigningCredentials credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
