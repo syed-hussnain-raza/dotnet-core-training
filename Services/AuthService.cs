@@ -12,11 +12,13 @@ namespace MyAssignment.Services
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IJwtTokenService _jwtTokenService;
+        private readonly IUserService _userService;
 
-        public AuthService(UserManager<IdentityUser> userManager, IJwtTokenService jwtTokenService)
+        public AuthService(UserManager<IdentityUser> userManager, IJwtTokenService jwtTokenService, IUserService userService)
         {
             _userManager = userManager;
             _jwtTokenService = jwtTokenService;
+            _userService = userService;
         }
 
         /// <summary>
@@ -31,6 +33,18 @@ namespace MyAssignment.Services
                 string errorMessage = BuildErrorMessage(identityResult);
                 throw new Exception(errorMessage);
             }
+
+            UserDto userDto = new UserDto
+            {
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                Email = dto.Email,
+                PhoneNumber = dto.PhoneNumber,
+                DateOfBirth = dto.DateOfBirth,
+                Address = dto.Address
+            };
+            
+            await _userService.CreateUserAsync(userDto);
         }
 
         /// <summary>

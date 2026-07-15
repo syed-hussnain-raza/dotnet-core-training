@@ -14,9 +14,14 @@ namespace MyAssignment.Models
         public int Id { get; set; }
 
         /// <summary>
-        /// Full name of the user.
+        /// First name of the user.
         /// </summary>
-        public string FullName { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Last name of the user.
+        /// </summary>
+        public string LastName { get; set; } = string.Empty;
 
         /// <summary>
         /// Email address of the user.
@@ -27,6 +32,16 @@ namespace MyAssignment.Models
         /// Contact phone number of the user.
         /// </summary>
         public string PhoneNumber { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Date of birth of the user.
+        /// </summary>
+        public DateTime? DateOfBirth { get; set; }
+
+        /// <summary>
+        /// Address of the user.
+        /// </summary>
+        public string Address { get; set; } = string.Empty;
 
         /// <summary>
         /// Membership tier of the user. Expected values: "Basic" or "Premium".
@@ -47,12 +62,15 @@ namespace MyAssignment.Models
         /// <summary>
         /// Creates a new User with all fields.
         /// </summary>
-        public User(int id, string fullName, string email, string phoneNumber, string membershipType = "Basic", bool isActive = true)
+        public User(int id, string firstName, string lastName, string email, string phoneNumber, DateTime? dateOfBirth = null, string address = "", string membershipType = "Basic", bool isActive = true)
         {
             Id = id;
-            FullName = fullName;
+            FirstName = firstName;
+            LastName = lastName;
             Email = email;
             PhoneNumber = phoneNumber;
+            DateOfBirth = dateOfBirth;
+            Address = address;
             MembershipType = membershipType;
             IsActive = isActive;
         }
