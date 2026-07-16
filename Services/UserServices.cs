@@ -1,5 +1,6 @@
 using AutoMapper;
 using MyAssignment.Dtos;
+using MyAssignment.Helper;
 using MyAssignment.Models;
 using MyAssignment.Repositories;
 using MyAssignment.Constants;
@@ -112,13 +113,23 @@ namespace MyAssignment.Services
                 return q => q.OrderBy(u => u.Id);
             }
 
-            return sortBy.ToLower() switch
+            switch (sortBy.ToLower())
             {
-                "fullname" => q => descending ? q.OrderByDescending(u => u.FirstName + " " + u.LastName) : q.OrderBy(u => u.FirstName + " " + u.LastName),
-                "email" => q => descending ? q.OrderByDescending(u => u.Email) : q.OrderBy(u => u.Email),
-                "membershiptype" => q => descending ? q.OrderByDescending(u => u.MembershipType) : q.OrderBy(u => u.MembershipType),
-                _ => q => q.OrderBy(u => u.Id)
-            };
+                case SortFieldsConstants.FullName:
+                    if (descending) return q => q.OrderByDescending(u => u.UserName);
+                    else return q => q.OrderBy(u => u.UserName);
+
+                case SortFieldsConstants.Email:
+                    if (descending) return q => q.OrderByDescending(u => u.Email);
+                    else return q => q.OrderBy(u => u.Email);
+
+                case SortFieldsConstants.MembershipType:
+                    if (descending) return q => q.OrderByDescending(u => u.MembershipType);
+                    else return q => q.OrderBy(u => u.MembershipType);
+
+                default:
+                    return q => q.OrderBy(u => u.Id);
+            }
         }
     }
 }

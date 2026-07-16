@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using MyAssignment.Data;
 using MyAssignment.Models;
 
@@ -15,7 +16,7 @@ namespace MyAssignment.Repositories
 
         public async Task<User?> GetByEmailAsync(string email)
         {
-            return await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.FirstOrDefaultAsync(_context.Users, u => u.Email == email);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
         }
     }
 }
