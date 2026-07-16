@@ -53,27 +53,19 @@ namespace MyAssignment.Controllers
         /// Confirms the user's email and sets their first password, using
         /// the token from the confirmation link sent at registration.
         /// </summary>
-        [HttpPost("confirm-email")]
+        [HttpPost(ApiRoutesConstants.ConfirmEmail)]
         public async Task<IActionResult> ConfirmEmail(ConfirmEmailDto dto)
         {
             IActionResult result;
 
             try
             {
-                (bool succeeded, string errorMessage) = await _authService.ConfirmEmailAsync(dto);
-
-                if (succeeded)
-                {
-                    result = Ok<object>(MessagesConstants.PasswordSetSuccess, default);
-                }
-                else
-                {
-                    result = BadRequest(errorMessage);
-                }
+                await _authService.ConfirmEmailAsync(dto);
+                result = Ok<object>(MessagesConstants.PasswordSetSuccess, default);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                result = BadRequest(MessagesConstants.UnexpectedError);
+                result = BadRequest(ex.Message);
             }
 
             return result;

@@ -8,10 +8,10 @@ namespace MyAssignment.Services
     /// </summary>
     public interface IAuthService
     {
-        Task<(bool Succeeded, string ErrorMessage)> RegisterAsync(RegisterDto dto);
+        Task RegisterAsync(RegisterDto dto);
 
-        Task<(bool Succeeded, string ErrorMessage)> ConfirmEmailAsync(ConfirmEmailDto dto);
+        Task ConfirmEmailAsync(ConfirmEmailDto dto);
 
-        Task<(bool Succeeded, string Token, string ErrorMessage)> LoginAsync(LoginDto dto);
+        Task<LoginResponseDto> LoginAsync(LoginDto dto);
     }
 }

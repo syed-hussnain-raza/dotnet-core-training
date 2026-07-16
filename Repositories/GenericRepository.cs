@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using MyAssignment.Data;
 using MyAssignment.Helper;
 using System.Linq.Expressions;
@@ -26,7 +26,7 @@ namespace MyAssignment.Repositories
             return entities;
         }
 
-        public async Task<T?> GetByIdAsync(int id)
+        public async Task<T?> GetByIdAsync(object id)
         {
             T? entity = await _dbSet.FindAsync(id);
             return entity;

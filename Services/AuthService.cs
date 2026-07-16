@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using MyAssignment.Options;
 using MyAssignment.Constants;
 using MyAssignment.Dtos;
 using AutoMapper;
@@ -15,24 +16,26 @@ namespace MyAssignment.Services
         private readonly UserManager<User> _userManager;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IEmailSender _emailSender;
-        private readonly IConfiguration _configuration;
+        private readonly IOptions<FrontendSettings> _frontendSettings;
+        private readonly IMapper _mapper;
 
         public AuthService(
-            UserManager<IdentityUser> userManager,
+            UserManager<User> userManager,
             IJwtTokenService jwtTokenService,
             IEmailSender emailSender,
-            IConfiguration configuration)
+            IOptions<FrontendSettings> frontendSettings,
+            IMapper mapper)
         {
             _userManager = userManager;
             _jwtTokenService = jwtTokenService;
             _emailSender = emailSender;
-            _configuration = configuration;
+            _frontendSettings = frontendSettings;
+            _mapper = mapper;
         }
 
-        public async Task<(bool Succeeded, string ErrorMessage)> RegisterAsync(RegisterDto dto)
+        public async Task RegisterAsync(RegisterDto dto)
         {
             IdentityResult identityResult = await CreateIdentityUserAsync(dto);
-            string errorMessage = string.Empty;
 
             if (identityResult.Succeeded)
             {
@@ -40,95 +43,93 @@ namespace MyAssignment.Services
             }
             else
             {
-                errorMessage = BuildErrorMessage(identityResult);
+                throw new Exception(MessagesConstants.RegistrationFailed);
             }
-
-            return (identityResult.Succeeded, errorMessage);
         }
 
-        public async Task<(bool Succeeded, string ErrorMessage)> ConfirmEmailAsync(ConfirmEmailDto dto)
+        public async Task ConfirmEmailAsync(ConfirmEmailDto dto)
         {
-            IdentityUser? identityUser = await _userManager.FindByEmailAsync(dto.Email);
-            bool succeeded = false;
-            string errorMessage = MessagesConstants.UserNotFound;
+            User? user = await _userManager.FindByEmailAsync(dto.Email);
 
-            if (identityUser != null)
+            if (user == null)
             {
-                bool alreadyHasPassword = await _userManager.HasPasswordAsync(identityUser);
-
-                if (alreadyHasPassword)
-                {
-                    errorMessage = MessagesConstants.AlreadyHasPassword;
-                }
-                else
-                {
-                    IdentityResult confirmResult = await _userManager.ConfirmEmailAsync(identityUser, dto.Token);
-
-                    if (!confirmResult.Succeeded)
-                    {
-                        errorMessage = MessagesConstants.EmailConfirmationFailed;
-                    }
-                    else
-                    {
-                        IdentityResult passwordResult = await _userManager.AddPasswordAsync(identityUser, dto.NewPassword);
-                        succeeded = passwordResult.Succeeded;
-                        errorMessage = succeeded ? string.Empty : BuildErrorMessage(passwordResult);
-                    }
-                }
+                throw new Exception(MessagesConstants.UserNotFound);
             }
 
-            return (succeeded, errorMessage);
+            bool alreadyHasPassword = await _userManager.HasPasswordAsync(user);
+
+            if (alreadyHasPassword)
+            {
+                throw new Exception(MessagesConstants.AlreadyHasPassword);
+            }
+
+            IdentityResult confirmResult = await _userManager.ConfirmEmailAsync(user, dto.Token);
+
+            if (!confirmResult.Succeeded)
+            {
+                throw new Exception(MessagesConstants.EmailConfirmationFailed);
+            }
+
+            IdentityResult passwordResult = await _userManager.AddPasswordAsync(user, dto.NewPassword);
+
+            if (!passwordResult.Succeeded)
+            {
+                throw new Exception(MessagesConstants.UnexpectedError);
+            }
         }
 
-        public async Task<(bool Succeeded, string Token, string ErrorMessage)> LoginAsync(LoginDto dto)
+        public async Task<LoginResponseDto> LoginAsync(LoginDto dto)
         {
-            IdentityUser? identityUser = await _userManager.FindByEmailAsync(dto.Email);
-            bool succeeded = false;
-            string token = string.Empty;
-            string errorMessage = MessagesConstants.InvalidCredentials;
+            User? user = await _userManager.FindByNameAsync(dto.UserName);
 
-            if (identityUser != null)
+            if (user == null)
             {
-                if (!identityUser.EmailConfirmed)
-                {
-                    errorMessage = MessagesConstants.EmailNotConfirmed;
-                }
-                else
-                {
-                    bool passwordValid = await _userManager.CheckPasswordAsync(identityUser, dto.Password);
-
-                    if (passwordValid)
-                    {
-                        token = await GenerateTokenForUserAsync(identityUser);
-                        succeeded = true;
-                        errorMessage = string.Empty;
-                    }
-                }
+                throw new Exception(MessagesConstants.InvalidCredentials);
             }
 
-            return (succeeded, token, errorMessage);
+            if (!user.EmailConfirmed)
+            {
+                throw new Exception(MessagesConstants.InvalidCredentials);
+            }
+
+            bool passwordValid = await _userManager.CheckPasswordAsync(user, dto.Password);
+
+            if (!passwordValid)
+            {
+                throw new Exception(MessagesConstants.InvalidCredentials);
+            }
+
+            string token = await GenerateTokenForUserAsync(user);
+            UserDto userDto = _mapper.Map<UserDto>(user);
+
+            return new LoginResponseDto
+            {
+                User = userDto,
+                Token = token
+            };
         }
 
         // Private Helper Methods
 
+        private async Task<IdentityResult> CreateIdentityUserAsync(RegisterDto dto)
+        {
+            User user = _mapper.Map<User>(dto);
+            user.UserName = dto.FirstName + dto.LastName;
 
             // no password argument — account starts passwordless until confirmed
-            IdentityResult identityResult = await _userManager.CreateAsync(identityUser);
+            IdentityResult identityResult = await _userManager.CreateAsync(user);
             return identityResult;
         }
 
         private async Task SendConfirmationEmailAsync(string email)
         {
-            IdentityUser? identityUser = await _userManager.FindByEmailAsync(email);
+            User? user = await _userManager.FindByEmailAsync(email);
 
-            if (identityUser != null)
+            if (user != null)
             {
-                string token = await _userManager.GenerateEmailConfirmationTokenAsync(identityUser);
-                string encodedToken = Uri.EscapeDataString(token);
-                string encodedEmail = Uri.EscapeDataString(email);
+                string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-                string baseUrl = _configuration["Frontend:ConfirmEmailUrl"] ?? string.Empty;
-                string confirmationLink = $"{baseUrl}?email={encodedEmail}&token={encodedToken}";
+                string confirmationLink = $"{_frontendSettings.Value.ConfirmEmailUrl}?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token)}";
 
                 string body = $"<p>Welcome! Click the link below to confirm your email and set your password:</p>" +
                               $"<p><a href=\"{confirmationLink}\">{confirmationLink}</a></p>";
@@ -137,36 +138,6 @@ namespace MyAssignment.Services
             }
         }
 
-        private string BuildErrorMessage(IdentityResult identityResult)
-        {
-            string errorMessage = string.Join(" ", identityResult.Errors.Select(e => e.Description));
-            return errorMessage;
-        }
-
-        /// <summary>
-        /// Looks up a user by email and validates the given password.
-
-        /// <summary>
-        /// Looks up a user by username and validates the given password.
-        /// Returns the matched user if credentials are valid, otherwise null.
-        /// </summary>
-        private async Task<User?> ValidateCredentialsAsync(LoginDto dto)
-        {
-            User? validatedUser = null;
-            User? user = await _userManager.FindByNameAsync(dto.UserName);
-            
-            if (user != null)
-            {
-                bool isPasswordValid = await _userManager.CheckPasswordAsync(user, dto.Password);
-                
-                if (isPasswordValid)
-                {
-                    validatedUser = user;
-                }
-            }
-
-            return validatedUser;
-        }
 
         /// <summary>
         /// Fetches the user's assigned roles and generates a signed JWT

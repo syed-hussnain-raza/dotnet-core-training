@@ -37,7 +37,7 @@ namespace MyAssignment.Services
         /// <summary>
         /// Deletes a user by id. Throws an exception if no matching user exists.
         /// </summary>
-        Task<bool> DeleteUserAsync(int id);
+        Task<bool> DeleteUserAsync(string id);
 
         /// <summary>
         /// Retrieves a paged, searchable, sortable list of users.

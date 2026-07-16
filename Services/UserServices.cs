@@ -3,6 +3,7 @@ using MyAssignment.Dtos;
 using MyAssignment.Models;
 using MyAssignment.Repositories;
 using MyAssignment.Helper;
+using MyAssignment.Constants;
 using System.Linq.Expressions;
 
 namespace MyAssignment.Services
@@ -27,9 +28,17 @@ namespace MyAssignment.Services
             return users;
         }
 
-        public async Task<User?> GetUserByIdAsync(int id)
+        public async Task<User> GetUserByIdAsync(string id)
         {
             User? user = await _userRepository.GetByIdAsync(id);
+            if (user == null) throw new Exception(MessagesConstants.UserNotFound);
+            return user;
+        }
+
+        public async Task<User> GetUserByEmailAsync(string email)
+        {
+            User? user = await _userRepository.GetByEmailAsync(email);
+            if (user == null) throw new Exception(MessagesConstants.UserNotFound);
             return user;
         }
 
@@ -45,37 +54,34 @@ namespace MyAssignment.Services
             return user;
         }
 
-        public async Task<User?> UpdateUserAsync(int id, UserDto dto)
+        public async Task<User> UpdateUserAsync(string id, UserDto dto)
         {
             User? user = await _userRepository.GetByIdAsync(id);
 
             if (user == null)
             {
-                _mapper.Map(dto, user);
-                await _userRepository.SaveChangesAsync();
+                throw new Exception(MessagesConstants.UserNotFound);
             }
 
             _mapper.Map(dto, user);
             user.UserName = dto.FirstName + dto.LastName;
-            await SaveAsync();
+            await _userRepository.SaveChangesAsync();
 
             return user;
         }
 
-        public async Task<bool> DeleteUserAsync(int id)
+        public async Task<bool> DeleteUserAsync(string id)
         {
             User? user = await _userRepository.GetByIdAsync(id);
-            bool deleted = false;
 
             if (user == null)
             {
-                _userRepository.Remove(user);
-                await _userRepository.SaveChangesAsync();
-                deleted = true;
+                throw new Exception(MessagesConstants.UserNotFound);
             }
 
-            _context.Users.Remove(user);
-            await SaveAsync();
+            _userRepository.Remove(user);
+            await _userRepository.SaveChangesAsync();
+            return true;
         }
 
         public async Task<PagedResult<User>> GetUsersPagedAsync(QueryParameters parameters)
@@ -97,7 +103,7 @@ namespace MyAssignment.Services
                 return null;
             }
 
-            return u => u.FullName.Contains(searchTerm) || u.Email.Contains(searchTerm);
+            return u => (u.FirstName + " " + u.LastName).Contains(searchTerm) || u.Email.Contains(searchTerm);
         }
 
         // Maps a sort field name from the query string to the actual property.
@@ -111,7 +117,7 @@ namespace MyAssignment.Services
 
             return sortBy.ToLower() switch
             {
-                "fullname" => q => descending ? q.OrderByDescending(u => u.FullName) : q.OrderBy(u => u.FullName),
+                "fullname" => q => descending ? q.OrderByDescending(u => u.FirstName + " " + u.LastName) : q.OrderBy(u => u.FirstName + " " + u.LastName),
                 "email" => q => descending ? q.OrderByDescending(u => u.Email) : q.OrderBy(u => u.Email),
                 "membershiptype" => q => descending ? q.OrderByDescending(u => u.MembershipType) : q.OrderBy(u => u.MembershipType),
                 _ => q => q.OrderBy(u => u.Id)

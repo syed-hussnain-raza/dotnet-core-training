@@ -1,4 +1,4 @@
-﻿using MyAssignment.Data;
+using MyAssignment.Data;
 using MyAssignment.Models;
 
 namespace MyAssignment.Repositories
@@ -11,6 +11,11 @@ namespace MyAssignment.Repositories
     {
         public UserRepository(AppDbContext context) : base(context)
         {
+        }
+
+        public async Task<User?> GetByEmailAsync(string email)
+        {
+            return await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.FirstOrDefaultAsync(_context.Users, u => u.Email == email);
         }
     }
 }

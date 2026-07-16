@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 
 namespace MyAssignment.Repositories
 {
@@ -9,7 +9,7 @@ namespace MyAssignment.Repositories
     {
         Task<List<T>> GetAllAsync();
 
-        Task<T?> GetByIdAsync(int id);
+        Task<T?> GetByIdAsync(object id);
 
         Task AddAsync(T entity);
 
