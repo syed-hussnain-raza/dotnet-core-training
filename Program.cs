@@ -42,6 +42,7 @@ builder.Services.AddEmailSender();
 builder.Services.AddIdentityConfiguration();
 builder.Services.Configure<MyAssignment.Options.JwtSettings>(builder.Configuration.GetSection("Jwt"));
 builder.Services.Configure<MyAssignment.Options.FrontendSettings>(builder.Configuration.GetSection("Frontend"));
+builder.Services.Configure<MyAssignment.Options.SmtpSettings>(builder.Configuration.GetSection("Smtp"));
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 // fallback authorization policy: every endpoint requires an authenticated
