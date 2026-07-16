@@ -14,9 +14,14 @@ namespace MyAssignment.Services
         Task<List<User>> GetAllUsersAsync();
 
         /// <summary>
-        /// Retrieves a single user by id, or null if none exists.
+        /// Retrieves a single user by id. Throws an exception if none exists.
         /// </summary>
-        Task<User?> GetUserByIdAsync(int id);
+        Task<User> GetUserByIdAsync(string id);
+
+        /// <summary>
+        /// Retrieves a single user by email. Throws an exception if none exists.
+        /// </summary>
+        Task<User> GetUserByEmailAsync(string email);
 
         /// <summary>
         /// Creates a new user from the given DTO.
@@ -24,14 +29,13 @@ namespace MyAssignment.Services
         Task<User> CreateUserAsync(UserDto dto);
 
         /// <summary>
-        /// Updates an existing user with the given DTO's values, or null if no
-        /// matching user exists.
+        /// Updates an existing user with the given DTO's values. Throws an exception if no matching user exists.
         /// </summary>
-        Task<User?> UpdateUserAsync(int id, UserDto dto);
+        Task<User> UpdateUserAsync(string id, UserDto dto);
 
         /// <summary>
-        /// Deletes a user by id. Returns true if found and deleted.
+        /// Deletes a user by id. Throws an exception if no matching user exists.
         /// </summary>
-        Task<bool> DeleteUserAsync(int id);
+        Task DeleteUserAsync(string id);
     }
 }

@@ -1,8 +1,10 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using MyAssignment.Constants;
 using MyAssignment.Data;
-using MyAssignment.Models;
 using MyAssignment.Dtos;
+using MyAssignment.Helper;
+using MyAssignment.Models;
 
 namespace MyAssignment.Services
 {
@@ -40,11 +42,28 @@ namespace MyAssignment.Services
         }
 
         /// <summary>
-        /// Retrieves a user by their unique identifier.
+        /// Retrieves a user by their unique identifier. Throws an exception if not found.
         /// </summary>
-        public async Task<User?> GetUserByIdAsync(int id)
+        public async Task<User> GetUserByIdAsync(string id)
         {
             User? user = await FindUserAsync(id);
+            if (user == null)
+            {
+                throw new Exception(MessagesConstants.UserNotFound);
+            }
+            return user;
+        }
+
+        /// <summary>
+        /// Retrieves a user by their email address. Throws an exception if not found.
+        /// </summary>
+        public async Task<User> GetUserByEmailAsync(string email)
+        {
+            User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null)
+            {
+                throw new Exception(MessagesConstants.UserNotFound);
+            }
             return user;
         }
 
@@ -55,43 +74,48 @@ namespace MyAssignment.Services
         {
             User user = _mapper.Map<User>(dto);
             user.IsActive = true;
+            user.UserName = UsernameGenerator.Generate(dto.FirstName, dto.LastName);
+
             _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-            return user;
-        }
 
-        /// <summary>
-        /// Updates an existing user in the database based on the provided DTO.
-        /// </summary>
-        public async Task<User?> UpdateUserAsync(int id, UserDto dto)
-        {
-            User? user = await FindUserAsync(id);
-
-            if (user != null)
-            {
-                _mapper.Map(dto, user);
-                await _context.SaveChangesAsync();
-            }
+            await SaveAsync();
 
             return user;
         }
 
         /// <summary>
-        /// Deletes a user from the database by their unique identifier.
+        /// Updates an existing user in the database based on the provided DTO. Throws an exception if not found.
         /// </summary>
-        public async Task<bool> DeleteUserAsync(int id)
+        public async Task<User> UpdateUserAsync(string id, UserDto dto)
         {
             User? user = await FindUserAsync(id);
-            bool deleted = false;
 
-            if (user != null)
+            if (user == null)
             {
-                _context.Users.Remove(user);
-                await _context.SaveChangesAsync();
-                deleted = true;
+                throw new Exception(MessagesConstants.UserNotFound);
             }
 
-            return deleted;
+            _mapper.Map(dto, user);
+            user.UserName = UsernameGenerator.Generate(dto.FirstName, dto.LastName);
+            await SaveAsync();
+
+            return user;
+        }
+
+        /// <summary>
+        /// Deletes a user from the database by their unique identifier. Throws an exception if not found.
+        /// </summary>
+        public async Task DeleteUserAsync(string id)
+        {
+            User? user = await FindUserAsync(id);
+
+            if (user == null)
+            {
+                throw new Exception(MessagesConstants.UserNotFound);
+            }
+
+            _context.Users.Remove(user);
+            await SaveAsync();
         }
 
         // Private Helper Methods
@@ -99,10 +123,18 @@ namespace MyAssignment.Services
         /// <summary>
         /// Finds a user by their primary key. Uses EF Core's FindAsync().
         /// </summary>
-        private async Task<User?> FindUserAsync(int id)
+        private async Task<User?> FindUserAsync(string id)
         {
             User? user = await _context.Users.FindAsync(id);
             return user;
+        }
+
+        /// <summary>
+        /// Saves changes to the database asynchronously.
+        /// </summary>
+        private Task SaveAsync()
+        {
+            return _context.SaveChangesAsync();
         }
     }
 }
