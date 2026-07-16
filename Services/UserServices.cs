@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using MyAssignment.Constants;
 using MyAssignment.Data;
 using MyAssignment.Dtos;
+using MyAssignment.Helper;
 using MyAssignment.Models;
 
 namespace MyAssignment.Services
@@ -73,7 +74,7 @@ namespace MyAssignment.Services
         {
             User user = _mapper.Map<User>(dto);
             user.IsActive = true;
-            user.UserName = dto.FirstName + dto.LastName;
+            user.UserName = UsernameGenerator.Generate(dto.FirstName, dto.LastName);
 
             _context.Users.Add(user);
 
@@ -95,7 +96,7 @@ namespace MyAssignment.Services
             }
 
             _mapper.Map(dto, user);
-            user.UserName = dto.FirstName + dto.LastName;
+            user.UserName = UsernameGenerator.Generate(dto.FirstName, dto.LastName);
             await SaveAsync();
 
             return user;

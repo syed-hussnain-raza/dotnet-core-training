@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using MyAssignment.Constants;
 using MyAssignment.Dtos;
 using AutoMapper;
+using MyAssignment.Helper;
 using MyAssignment.Models;
 
 namespace MyAssignment.Services
@@ -29,7 +30,7 @@ namespace MyAssignment.Services
         public async Task RegisterAsync(RegisterDto dto)
         {
             User user = _mapper.Map<User>(dto);
-            user.UserName = dto.FirstName + dto.LastName;
+            user.UserName = UsernameGenerator.Generate(dto.FirstName, dto.LastName);
             
             IdentityResult identityResult = await _userManager.CreateAsync(user, dto.Password);
             
