@@ -9,10 +9,16 @@ namespace MyAssignment.Dtos
     public class UserDto
     {
         /// <summary>
-        /// FullName is required and cannot be empty.
+        /// FirstName is required and cannot be empty.
         /// </summary>
         [Required]
-        public string FullName { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// LastName is required and cannot be empty.
+        /// </summary>
+        [Required]
+        public string LastName { get; set; } = string.Empty;
 
         /// <summary>
         /// Email is required and must follow a valid email format.
@@ -27,6 +33,17 @@ namespace MyAssignment.Dtos
         [Required]
         [RegularExpression(@"^03\d{9}$", ErrorMessage = MessagesConstants.InvalidPhoneFormat)]
         public string PhoneNumber { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Date of birth of the user.
+        /// </summary>
+        [Required]
+        public DateOnly DateOfBirth { get; set; }
+
+        /// <summary>
+        /// Address of the user.
+        /// </summary>
+        public string Address { get; set; } = string.Empty;
 
         /// <summary>
         /// MembershipType can be either "Basic" or "Premium" only.

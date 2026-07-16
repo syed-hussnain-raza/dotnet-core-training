@@ -2,8 +2,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using MyAssignment.Options;
 
 namespace MyAssignment.Services
 {
@@ -13,18 +14,18 @@ namespace MyAssignment.Services
     /// </summary>
     public class JwtTokenService : IJwtTokenService
     {
-        private readonly IConfiguration _configuration;
+        private readonly JwtSettings _jwtSettings;
 
-        public JwtTokenService(IConfiguration configuration)
+        public JwtTokenService(IOptions<JwtSettings> jwtOptions)
         {
-            _configuration = configuration;
+            _jwtSettings = jwtOptions.Value;
         }
 
         /// <summary>
         /// Builds a JWT containing the user's id, email, a unique token
         /// identifier (jti), and one claim per assigned role.
         /// </summary>
-        public string GenerateToken(IdentityUser user, IList<string> roles)
+        public string GenerateToken(Models.User user, IList<string> roles)
         {
             List<Claim> claims = new List<Claim>
             {
@@ -38,23 +39,18 @@ namespace MyAssignment.Services
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
 
-            string key = _configuration["Jwt:Key"] ?? string.Empty;
-            string issuer = _configuration["Jwt:Issuer"] ?? string.Empty;
-            string audience = _configuration["Jwt:Audience"] ?? string.Empty;
-            int expiryMinutes = int.Parse(_configuration["Jwt:ExpiryMinutes"] ?? "60");
-
-            SymmetricSecurityKey signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+            SymmetricSecurityKey signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
             SigningCredentials credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
 
             JwtSecurityToken token = new JwtSecurityToken(
-                issuer: issuer,
-                audience: audience,
+                issuer: _jwtSettings.Issuer,
+                audience: _jwtSettings.Audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(expiryMinutes),
+                expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
                 signingCredentials: credentials);
-
-            string tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-            return tokenString;
+            
+            // return token string
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

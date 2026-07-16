@@ -12,8 +12,5 @@ obj/
 # Secrets
 appsettings.Development.json
 
-# Migrations
-Migrations/
-
-# Env
+# Environment variables
 .env

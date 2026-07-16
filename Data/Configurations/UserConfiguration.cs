@@ -20,8 +20,13 @@ namespace MyAssignment.Data.Configurations
             // Set the primary key for the User entity.
             entity.HasKey(u => u.Id);
 
-            // Configure the FullName property to be required and have a maximum length of 50 characters.
-            entity.Property(u => u.FullName)
+            // Configure the FirstName property to be required and have a maximum length of 50 characters.
+            entity.Property(u => u.FirstName)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            // Configure the LastName property to be required and have a maximum length of 50 characters.
+            entity.Property(u => u.LastName)
                 .IsRequired()
                 .HasMaxLength(50);
 
@@ -38,6 +43,10 @@ namespace MyAssignment.Data.Configurations
             entity.Property(u => u.PhoneNumber)
                 .IsRequired()
                 .HasMaxLength(20);
+
+            // Configure Address property
+            entity.Property(u => u.Address)
+                .HasMaxLength(500);
 
             // Configure the MembershipType property to be required, have a maximum length of 20 characters,
             // and have a default value of "Basic".

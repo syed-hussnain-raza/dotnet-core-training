@@ -5,6 +5,7 @@ using MyAssignment.Services;
 using MyAssignment.Constants;
 using MyAssignment.Helper;
 using Asp.Versioning;
+using MyAssignment.Shared;
 
 namespace MyAssignment.Controllers
 {
@@ -43,9 +44,9 @@ namespace MyAssignment.Controllers
                 PagedResult<User> pagedUsers = await _userService.GetUsersPagedAsync(parameters);
                 result = Ok(MessagesConstants.UsersFetched, pagedUsers);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                result = BadRequest(MessagesConstants.UnexpectedError);
+                result = BadRequest(ex.Message);
             }
 
             return result;
@@ -57,26 +58,18 @@ namespace MyAssignment.Controllers
         /// <param name="id">The unique identifier of the user.</param>
         /// <returns>200 OK with the user if found; otherwise 400 Bad Request.</returns>
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserById(int id)
+        public async Task<IActionResult> GetUserById(string id)
         {
             IActionResult result;
 
             try
             {
-                User? user = await _userService.GetUserByIdAsync(id);
-
-                if (user == null)
-                {
-                    result = BadRequest(MessagesConstants.UserNotFound);
-                }
-                else
-                {
-                    result = Ok(MessagesConstants.UserFetched, user);
-                }
+                User user = await _userService.GetUserByIdAsync(id);
+                result = Ok(MessagesConstants.UserFetched, user);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                result = BadRequest(MessagesConstants.UnexpectedError);
+                result = BadRequest(ex.Message);
             }
 
             return result;
@@ -97,9 +90,9 @@ namespace MyAssignment.Controllers
                 User user = await _userService.CreateUserAsync(dto);
                 result = Ok(MessagesConstants.UserCreated, user);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                result = BadRequest(MessagesConstants.UnexpectedError);
+                result = BadRequest(ex.Message);
             }
 
             return result;
@@ -111,26 +104,18 @@ namespace MyAssignment.Controllers
         /// <param name="id">The unique identifier of the user to delete.</param>
         /// <returns>200 OK with a confirmation message if deleted; otherwise 400 Bad Request.</returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
+        public async Task<IActionResult> DeleteUser(string id)
         {
             IActionResult result;
 
             try
             {
-                bool deleted = await _userService.DeleteUserAsync(id);
-
-                if (!deleted)
-                {
-                    result = BadRequest(MessagesConstants.UserNotFound);
-                }
-                else
-                {
-                    result = Ok<object>(MessagesConstants.UserDeleted, default);
-                }
+                await _userService.DeleteUserAsync(id);
+                result = Ok<object>(MessagesConstants.UserDeleted, default);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                result = BadRequest(MessagesConstants.UnexpectedError);
+                result = BadRequest(ex.Message);
             }
 
             return result;
@@ -143,26 +128,18 @@ namespace MyAssignment.Controllers
         /// <param name="dto">The new data to apply to the user.</param>
         /// <returns>200 OK with the updated user if valid; otherwise 400 Bad Request.</returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, UserDto dto)
+        public async Task<IActionResult> UpdateUser(string id, UserDto dto)
         {
             IActionResult result;
 
             try
             {
-                User? user = await _userService.UpdateUserAsync(id, dto);
-
-                if (user == null)
-                {
-                    result = BadRequest(MessagesConstants.UserNotFound);
-                }
-                else
-                {
-                    result = Ok(MessagesConstants.UserUpdated, user);
-                }
+                User user = await _userService.UpdateUserAsync(id, dto);
+                result = Ok(MessagesConstants.UserUpdated, user);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                result = BadRequest(MessagesConstants.UnexpectedError);
+                result = BadRequest(ex.Message);
             }
 
             return result;

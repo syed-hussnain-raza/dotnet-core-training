@@ -37,6 +37,7 @@ namespace MyAssignment.Services
         {
             User user = _mapper.Map<User>(dto);
             user.IsActive = true;
+            user.UserName = dto.FirstName + dto.LastName;
 
             await _userRepository.AddAsync(user);
             await _userRepository.SaveChangesAsync();
@@ -48,11 +49,15 @@ namespace MyAssignment.Services
         {
             User? user = await _userRepository.GetByIdAsync(id);
 
-            if (user != null)
+            if (user == null)
             {
                 _mapper.Map(dto, user);
                 await _userRepository.SaveChangesAsync();
             }
+
+            _mapper.Map(dto, user);
+            user.UserName = dto.FirstName + dto.LastName;
+            await SaveAsync();
 
             return user;
         }
@@ -62,14 +67,15 @@ namespace MyAssignment.Services
             User? user = await _userRepository.GetByIdAsync(id);
             bool deleted = false;
 
-            if (user != null)
+            if (user == null)
             {
                 _userRepository.Remove(user);
                 await _userRepository.SaveChangesAsync();
                 deleted = true;
             }
 
-            return deleted;
+            _context.Users.Remove(user);
+            await SaveAsync();
         }
 
         public async Task<PagedResult<User>> GetUsersPagedAsync(QueryParameters parameters)

@@ -10,6 +10,6 @@ namespace MyAssignment.Services
 		/// <summary>
 		/// Generates a signed JWT for the given user, embedding their id, email, and role claims.
 		/// </summary>
-		string GenerateToken(IdentityUser user, IList<string> roles);
+		string GenerateToken(Models.User user, IList<string> roles);
 	}
 }

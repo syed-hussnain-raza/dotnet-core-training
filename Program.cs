@@ -40,6 +40,7 @@ builder.Services.AddEmailSender();
 
 // Identity (login/credentials) and JWT bearer authentication
 builder.Services.AddIdentityConfiguration();
+builder.Services.Configure<MyAssignment.Options.JwtSettings>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 // fallback authorization policy: every endpoint requires an authenticated

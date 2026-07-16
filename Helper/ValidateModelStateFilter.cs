@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using MyAssignment.Constants;
 
 namespace MyAssignment.Helper
 {
@@ -14,12 +15,8 @@ namespace MyAssignment.Helper
 		{
 			if (!context.ModelState.IsValid)
 			{
-				string errors = string.Join(" ", context.ModelState.Values
-					.SelectMany(v => v.Errors)
-					.Select(e => e.ErrorMessage));
-
 				context.Result = new BadRequestObjectResult(
-					ApiResponse<object>.FailResponse(errors));
+					Response<object>.FailureResponse(MessagesConstants.ValidationError));
 			}
 		}
 

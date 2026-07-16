@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using MyAssignment.Constants;
 using MyAssignment.Dtos;
+using AutoMapper;
+using MyAssignment.Models;
 
 namespace MyAssignment.Services
 {
@@ -10,7 +12,7 @@ namespace MyAssignment.Services
     /// </summary>
     public class AuthService : IAuthService
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<User> _userManager;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IEmailSender _emailSender;
         private readonly IConfiguration _configuration;
@@ -109,17 +111,6 @@ namespace MyAssignment.Services
 
         // Private Helper Methods
 
-        /// <summary>
-        /// Creates a new Identity account. Username is set equal to email,
-        /// since this system does not use a separate username concept.
-        /// </summary>
-        private async Task<IdentityResult> CreateIdentityUserAsync(RegisterDto dto)
-        {
-            IdentityUser identityUser = new IdentityUser
-            {
-                UserName = dto.Email,
-                Email = dto.Email
-            };
 
             // no password argument — account starts passwordless until confirmed
             IdentityResult identityResult = await _userManager.CreateAsync(identityUser);
@@ -154,13 +145,25 @@ namespace MyAssignment.Services
 
         /// <summary>
         /// Looks up a user by email and validates the given password.
+
+        /// <summary>
+        /// Looks up a user by username and validates the given password.
         /// Returns the matched user if credentials are valid, otherwise null.
         /// </summary>
-        private async Task<IdentityUser?> ValidateCredentialsAsync(LoginDto dto)
+        private async Task<User?> ValidateCredentialsAsync(LoginDto dto)
         {
-            IdentityUser? identityUser = await _userManager.FindByEmailAsync(dto.Email);
-            bool passwordValid = identityUser != null && await _userManager.CheckPasswordAsync(identityUser, dto.Password);
-            IdentityUser? validatedUser = passwordValid ? identityUser : null;
+            User? validatedUser = null;
+            User? user = await _userManager.FindByNameAsync(dto.UserName);
+            
+            if (user != null)
+            {
+                bool isPasswordValid = await _userManager.CheckPasswordAsync(user, dto.Password);
+                
+                if (isPasswordValid)
+                {
+                    validatedUser = user;
+                }
+            }
 
             return validatedUser;
         }
@@ -169,12 +172,10 @@ namespace MyAssignment.Services
         /// Fetches the user's assigned roles and generates a signed JWT
         /// embedding them as claims.
         /// </summary>
-        private async Task<string> GenerateTokenForUserAsync(IdentityUser identityUser)
+        private async Task<string> GenerateTokenForUserAsync(User user)
         {
-            IList<string> roles = await _userManager.GetRolesAsync(identityUser);
-            string token = _jwtTokenService.GenerateToken(identityUser, roles);
-
-            return token;
+            IList<string> roles = await _userManager.GetRolesAsync(user);
+            return _jwtTokenService.GenerateToken(user, roles);
         }
     }
 }

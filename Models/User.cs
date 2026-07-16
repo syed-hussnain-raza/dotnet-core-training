@@ -1,32 +1,31 @@
-using System.ComponentModel.DataAnnotations;
-using MyAssignment.Constants;
+using Microsoft.AspNetCore.Identity;
 
 namespace MyAssignment.Models
 {
     /// <summary>
     /// Represents a single User in the system.
     /// </summary>
-    public class User
+    public class User : IdentityUser
     {
         /// <summary>
-        /// Unique identifier of the user. Server-generated.
+        /// First name of the user.
         /// </summary>
-        public int Id { get; set; }
+        public string FirstName { get; set; } = string.Empty;
 
         /// <summary>
-        /// Full name of the user.
+        /// Last name of the user.
         /// </summary>
-        public string FullName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
 
         /// <summary>
-        /// Email address of the user.
+        /// Date of birth of the user.
         /// </summary>
-        public string Email { get; set; } = string.Empty;
+        public DateOnly DateOfBirth { get; set; }
 
         /// <summary>
-        /// Contact phone number of the user.
+        /// Address of the user.
         /// </summary>
-        public string PhoneNumber { get; set; } = string.Empty;
+        public string Address { get; set; } = string.Empty;
 
         /// <summary>
         /// Membership tier of the user. Expected values: "Basic" or "Premium".
@@ -47,12 +46,15 @@ namespace MyAssignment.Models
         /// <summary>
         /// Creates a new User with all fields.
         /// </summary>
-        public User(int id, string fullName, string email, string phoneNumber, string membershipType = "Basic", bool isActive = true)
+        public User(string firstName, string lastName, string email, string phoneNumber, DateOnly dateOfBirth, string address = "", string membershipType = "Basic", bool isActive = true)
         {
-            Id = id;
-            FullName = fullName;
+            UserName = firstName + lastName;
             Email = email;
+            FirstName = firstName;
+            LastName = lastName;
             PhoneNumber = phoneNumber;
+            DateOfBirth = dateOfBirth;
+            Address = address;
             MembershipType = membershipType;
             IsActive = isActive;
         }
