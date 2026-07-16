@@ -6,6 +6,7 @@ using MyAssignment.Extensions;
 using MyAssignment.Helper;
 using MyAssignment.Repositories;
 using MyAssignment.Services;
+using MyAssignment.Options;
 
 // load .env into process environment variables before the builder reads
 // configuration, so Smtp__Password becomes available as Smtp:Password
@@ -40,9 +41,9 @@ builder.Services.AddEmailSender();
 
 // Identity (login/credentials) and JWT bearer authentication
 builder.Services.AddIdentityConfiguration();
-builder.Services.Configure<MyAssignment.Options.JwtSettings>(builder.Configuration.GetSection("Jwt"));
-builder.Services.Configure<MyAssignment.Options.FrontendSettings>(builder.Configuration.GetSection("Frontend"));
-builder.Services.Configure<MyAssignment.Options.SmtpSettings>(builder.Configuration.GetSection("Smtp"));
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
+builder.Services.Configure<FrontendSettings>(builder.Configuration.GetSection(FrontendSettings.SectionName));
+builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection(SmtpSettings.SectionName));
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 // fallback authorization policy: every endpoint requires an authenticated
