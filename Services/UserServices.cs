@@ -1,9 +1,7 @@
 using AutoMapper;
 using MyAssignment.Dtos;
-using MyAssignment.Helper;
 using MyAssignment.Models;
 using MyAssignment.Repositories;
-using MyAssignment.Helper;
 using MyAssignment.Constants;
 using System.Linq.Expressions;
 
@@ -23,27 +21,23 @@ namespace MyAssignment.Services
             _mapper = mapper;
         }
 
-        public async Task<List<User>> GetAllUsersAsync()
-        {
-            List<User> users = await _userRepository.GetAllAsync();
-            return users;
-        }
 
-        public async Task<User> GetUserByIdAsync(string id)
+
+        public async Task<UserResponseDto> GetUserByIdAsync(string id)
         {
             User? user = await _userRepository.GetByIdAsync(id);
             if (user == null) throw new Exception(MessagesConstants.UserNotFound);
-            return user;
+            return _mapper.Map<UserResponseDto>(user);
         }
 
-        public async Task<User> GetUserByEmailAsync(string email)
+        public async Task<UserResponseDto> GetUserByEmailAsync(string email)
         {
             User? user = await _userRepository.GetByEmailAsync(email);
             if (user == null) throw new Exception(MessagesConstants.UserNotFound);
-            return user;
+            return _mapper.Map<UserResponseDto>(user);
         }
 
-        public async Task<User> CreateUserAsync(UserDto dto)
+        public async Task<UserResponseDto> CreateUserAsync(UserDto dto)
         {
             User user = _mapper.Map<User>(dto);
             user.IsActive = true;
@@ -52,10 +46,10 @@ namespace MyAssignment.Services
             await _userRepository.AddAsync(user);
             await _userRepository.SaveChangesAsync();
 
-            return user;
+            return _mapper.Map<UserResponseDto>(user);
         }
 
-        public async Task<User> UpdateUserAsync(string id, UserDto dto)
+        public async Task<UserResponseDto> UpdateUserAsync(string id, UserDto dto)
         {
             User? user = await _userRepository.GetByIdAsync(id);
 
@@ -68,7 +62,7 @@ namespace MyAssignment.Services
             user.UserName = UsernameGenerator.Generate(dto.FirstName, dto.LastName);
             await _userRepository.SaveChangesAsync();
 
-            return user;
+            return _mapper.Map<UserResponseDto>(user);
         }
 
         public async Task<bool> DeleteUserAsync(string id)
@@ -85,7 +79,7 @@ namespace MyAssignment.Services
             return true;
         }
 
-        public async Task<PagedResult<User>> GetUsersPagedAsync(QueryParameters parameters)
+        public async Task<PagedResult<UserResponseDto>> GetUsersPagedAsync(QueryParameters parameters)
         {
             Expression<Func<User, bool>>? filter = BuildFilter(parameters.SearchTerm);
             Func<IQueryable<User>, IOrderedQueryable<User>>? orderBy = BuildOrderBy(parameters.SortBy, parameters.SortDescending);
@@ -93,7 +87,9 @@ namespace MyAssignment.Services
             (List<User> items, int totalCount) = await _userRepository.GetPagedAsync(
                 parameters.Page, parameters.PageSize, filter, orderBy);
 
-            return new PagedResult<User>(items, totalCount, parameters.Page, parameters.PageSize);
+            List<UserResponseDto> dtos = _mapper.Map<List<UserResponseDto>>(items);
+
+            return new PagedResult<UserResponseDto>(dtos, totalCount, parameters.Page, parameters.PageSize);
         }
 
         // Private Helper Methods
@@ -104,7 +100,7 @@ namespace MyAssignment.Services
                 return null;
             }
 
-            return u => (u.FirstName + " " + u.LastName).Contains(searchTerm) || u.Email.Contains(searchTerm);
+            return u => u.UserName.Contains(searchTerm) || u.Email.Contains(searchTerm);
         }
 
         // Maps a sort field name from the query string to the actual property.

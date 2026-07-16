@@ -101,7 +101,7 @@ namespace MyAssignment.Services
             }
 
             string token = await GenerateTokenForUserAsync(user);
-            UserDto userDto = _mapper.Map<UserDto>(user);
+            UserResponseDto userDto = _mapper.Map<UserResponseDto>(user);
 
             return new LoginResponseDto
             {
@@ -115,7 +115,7 @@ namespace MyAssignment.Services
         private async Task<IdentityResult> CreateIdentityUserAsync(RegisterDto dto)
         {
             User user = _mapper.Map<User>(dto);
-            user.UserName = dto.FirstName + dto.LastName;
+            user.UserName = UsernameGenerator.Generate(dto.FirstName, dto.LastName);
 
             // no password argument — account starts passwordless until confirmed
             IdentityResult identityResult = await _userManager.CreateAsync(user);

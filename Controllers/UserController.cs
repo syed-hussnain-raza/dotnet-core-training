@@ -6,6 +6,7 @@ using MyAssignment.Constants;
 using MyAssignment.Helper;
 using Asp.Versioning;
 using MyAssignment.Shared;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MyAssignment.Controllers
 {
@@ -15,6 +16,7 @@ namespace MyAssignment.Controllers
     [ApiController]
     [ApiVersion(ApiVersionsConstants.V1)]
     [Route(ApiRoutesConstants.Users)]
+    [Authorize]
     public class UserController : BaseApiController
     {
         /// <summary>
@@ -41,7 +43,7 @@ namespace MyAssignment.Controllers
 
             try
             {
-                PagedResult<User> pagedUsers = await _userService.GetUsersPagedAsync(parameters);
+                PagedResult<UserResponseDto> pagedUsers = await _userService.GetUsersPagedAsync(parameters);
                 result = Ok(MessagesConstants.UsersFetched, pagedUsers);
             }
             catch (Exception ex)
@@ -64,7 +66,7 @@ namespace MyAssignment.Controllers
 
             try
             {
-                User user = await _userService.GetUserByIdAsync(id);
+                UserResponseDto user = await _userService.GetUserByIdAsync(id);
                 result = Ok(MessagesConstants.UserFetched, user);
             }
             catch (Exception ex)
@@ -87,7 +89,7 @@ namespace MyAssignment.Controllers
 
             try
             {
-                User user = await _userService.CreateUserAsync(dto);
+                UserResponseDto user = await _userService.CreateUserAsync(dto);
                 result = Ok(MessagesConstants.UserCreated, user);
             }
             catch (Exception ex)
@@ -134,7 +136,7 @@ namespace MyAssignment.Controllers
 
             try
             {
-                User user = await _userService.UpdateUserAsync(id, dto);
+                UserResponseDto user = await _userService.UpdateUserAsync(id, dto);
                 result = Ok(MessagesConstants.UserUpdated, user);
             }
             catch (Exception ex)
