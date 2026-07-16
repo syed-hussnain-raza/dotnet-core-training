@@ -1,5 +1,6 @@
 using AutoMapper;
 using MyAssignment.Dtos;
+using MyAssignment.Helper;
 using MyAssignment.Models;
 using MyAssignment.Repositories;
 using MyAssignment.Helper;
@@ -46,7 +47,7 @@ namespace MyAssignment.Services
         {
             User user = _mapper.Map<User>(dto);
             user.IsActive = true;
-            user.UserName = dto.FirstName + dto.LastName;
+            user.UserName = UsernameGenerator.Generate(dto.FirstName, dto.LastName);
 
             await _userRepository.AddAsync(user);
             await _userRepository.SaveChangesAsync();
@@ -64,7 +65,7 @@ namespace MyAssignment.Services
             }
 
             _mapper.Map(dto, user);
-            user.UserName = dto.FirstName + dto.LastName;
+            user.UserName = UsernameGenerator.Generate(dto.FirstName, dto.LastName);
             await _userRepository.SaveChangesAsync();
 
             return user;
