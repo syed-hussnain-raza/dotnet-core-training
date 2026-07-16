@@ -11,6 +11,9 @@ namespace MyAssignment.Helper
     {
         public MappingProfile()
         {
+            // Tell AutoMapper: RegisterDto -> User
+            CreateMap<RegisterDto, User>();
+
             // Tell AutoMapper: UserDto <-> User
             CreateMap<UserDto, User>().ReverseMap();
         }

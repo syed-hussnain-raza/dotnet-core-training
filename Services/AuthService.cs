@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using MyAssignment.Constants;
 using MyAssignment.Dtos;
 using AutoMapper;
+using MyAssignment.Models;
 
 namespace MyAssignment.Services
 {
@@ -11,11 +12,11 @@ namespace MyAssignment.Services
     /// </summary>
     public class AuthService : IAuthService
     {
-        private readonly UserManager<Models.User> _userManager;
+        private readonly UserManager<User> _userManager;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IMapper _mapper;
 
-        public AuthService(UserManager<Models.User> userManager, IJwtTokenService jwtTokenService, IMapper mapper)
+        public AuthService(UserManager<User> userManager, IJwtTokenService jwtTokenService, IMapper mapper)
         {
             _userManager = userManager;
             _jwtTokenService = jwtTokenService;
@@ -27,7 +28,8 @@ namespace MyAssignment.Services
         /// </summary>
         public async Task RegisterAsync(RegisterDto dto)
         {
-            Models.User user = new Models.User(dto.FirstName, dto.LastName, dto.Email, dto.PhoneNumber, dto.DateOfBirth, dto.Address);
+            User user = _mapper.Map<User>(dto);
+            user.UserName = dto.FirstName + dto.LastName;
             
             IdentityResult identityResult = await _userManager.CreateAsync(user, dto.Password);
             
@@ -42,7 +44,7 @@ namespace MyAssignment.Services
         /// </summary>
         public async Task<LoginResponseDto> LoginAsync(LoginDto dto)
         {
-            Models.User? user = await ValidateCredentialsAsync(dto);
+            User? user = await ValidateCredentialsAsync(dto);
 
             if (user == null)
             {
@@ -68,10 +70,10 @@ namespace MyAssignment.Services
         /// Looks up a user by username and validates the given password.
         /// Returns the matched user if credentials are valid, otherwise null.
         /// </summary>
-        private async Task<Models.User?> ValidateCredentialsAsync(LoginDto dto)
+        private async Task<User?> ValidateCredentialsAsync(LoginDto dto)
         {
-            Models.User? validatedUser = null;
-            Models.User? user = await _userManager.FindByNameAsync(dto.UserName);
+            User? validatedUser = null;
+            User? user = await _userManager.FindByNameAsync(dto.UserName);
             
             if (user != null)
             {
@@ -90,12 +92,10 @@ namespace MyAssignment.Services
         /// Fetches the user's assigned roles and generates a signed JWT
         /// embedding them as claims.
         /// </summary>
-        private async Task<string> GenerateTokenForUserAsync(Models.User user)
+        private async Task<string> GenerateTokenForUserAsync(User user)
         {
             IList<string> roles = await _userManager.GetRolesAsync(user);
-            string token = _jwtTokenService.GenerateToken(user, roles);
-
-            return token;
+            return _jwtTokenService.GenerateToken(user, roles);
         }
     }
 }

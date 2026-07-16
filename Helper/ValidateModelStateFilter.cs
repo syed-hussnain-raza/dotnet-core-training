@@ -15,15 +15,8 @@ namespace MyAssignment.Helper
 		{
 			if (!context.ModelState.IsValid)
 			{
-				var errors = context.ModelState
-					.Where(ms => ms.Value != null && ms.Value.Errors.Count > 0)
-					.ToDictionary(
-						kvp => kvp.Key,
-						kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
-					);
-
 				context.Result = new BadRequestObjectResult(
-					Response<object>.FailureResponse(MessagesConstants.ValidationError, errors));
+					Response<object>.FailureResponse(MessagesConstants.ValidationError));
 			}
 		}
 
