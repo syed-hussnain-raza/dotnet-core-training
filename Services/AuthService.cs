@@ -50,7 +50,7 @@ namespace MyAssignment.Services
 
         public async Task ConfirmEmailAsync(ConfirmEmailDto dto)
         {
-            User? user = await _userManager.FindByEmailAsync(dto.Email);
+            User? user = await _userManager.FindByIdAsync(dto.UserId);
 
             if (user == null)
             {
@@ -71,7 +71,34 @@ namespace MyAssignment.Services
                 throw new Exception(MessagesConstants.EmailConfirmationFailed);
             }
 
-            IdentityResult passwordResult = await _userManager.AddPasswordAsync(user, dto.NewPassword);
+            // Generate password reset token
+            string resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            // Send an email with the link to set the password
+            string setPasswordLink = $"{_frontendSettings.Value.SetPasswordUrl}?userId={Uri.EscapeDataString(user.Id)}&token={Uri.EscapeDataString(resetToken)}";
+            string body = EmailTemplates.GetSetPasswordEmailTemplate(setPasswordLink);
+
+            await _emailSender.SendEmailAsync(user.Email!, "Set your password", body);
+        }
+
+        public async Task SetPasswordAsync(SetPasswordDto dto)
+        {
+            User? user = await _userManager.FindByIdAsync(dto.UserId);
+
+            if (user == null)
+            {
+                throw new Exception(MessagesConstants.UserNotFound);
+            }
+
+            bool alreadyHasPassword = await _userManager.HasPasswordAsync(user);
+
+            if (alreadyHasPassword)
+            {
+                throw new Exception(MessagesConstants.AlreadyHasPassword);
+            }
+
+            // Since user has no password yet, ResetPasswordAsync is the secure way to use the reset token to set the first password
+            IdentityResult passwordResult = await _userManager.ResetPasswordAsync(user, dto.Token, dto.NewPassword);
 
             if (!passwordResult.Succeeded)
             {
@@ -130,10 +157,8 @@ namespace MyAssignment.Services
             {
                 string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-                string confirmationLink = $"{_frontendSettings.Value.ConfirmEmailUrl}?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token)}";
-
-                string body = $"<p>Welcome! Click the link below to confirm your email and set your password:</p>" +
-                              $"<p><a href=\"{confirmationLink}\">{confirmationLink}</a></p>";
+                string confirmationLink = $"{_frontendSettings.Value.ConfirmEmailUrl}?userId={Uri.EscapeDataString(user.Id)}&token={Uri.EscapeDataString(token)}";
+                string body = EmailTemplates.GetConfirmationEmailTemplate(confirmationLink);
 
                 await _emailSender.SendEmailAsync(email, "Confirm your account", body);
             }

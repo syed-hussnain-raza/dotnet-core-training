@@ -3,10 +3,9 @@ using System.ComponentModel.DataAnnotations;
 namespace MyAssignment.Dtos
 {
     /// <summary>
-    /// Submitted after the user follows the confirmation link — confirms
-    /// the email and sets the account's first password in one step.
+    /// Submitted to set the password after confirming the email.
     /// </summary>
-    public class ConfirmEmailDto
+    public class SetPasswordDto
     {
         [Required]
         public string UserId { get; set; } = string.Empty;
@@ -14,5 +13,8 @@ namespace MyAssignment.Dtos
         [Required]
         public string Token { get; set; } = string.Empty;
 
+        [Required]
+        [MinLength(6)]
+        public string NewPassword { get; set; } = string.Empty;
     }
 }

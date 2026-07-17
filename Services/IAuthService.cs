@@ -12,6 +12,8 @@ namespace MyAssignment.Services
 
         Task ConfirmEmailAsync(ConfirmEmailDto dto);
 
+        Task SetPasswordAsync(SetPasswordDto dto);
+
         Task<LoginResponseDto> LoginAsync(LoginDto dto);
     }
 }

@@ -50,8 +50,7 @@ namespace MyAssignment.Controllers
         }
 
         /// <summary>
-        /// Confirms the user's email and sets their first password, using
-        /// the token from the confirmation link sent at registration.
+        /// Confirms the user's email and sends a second email to set their password.
         /// </summary>
         [HttpPost(ApiRoutesConstants.ConfirmEmail)]
         public async Task<IActionResult> ConfirmEmail(ConfirmEmailDto dto)
@@ -61,6 +60,27 @@ namespace MyAssignment.Controllers
             try
             {
                 await _authService.ConfirmEmailAsync(dto);
+                result = Ok<object>(MessagesConstants.EmailConfirmed, default);
+            }
+            catch (Exception ex)
+            {
+                result = BadRequest(ex.Message);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Sets the user's first password using the reset token.
+        /// </summary>
+        [HttpPost(ApiRoutesConstants.SetPassword)]
+        public async Task<IActionResult> SetPassword(SetPasswordDto dto)
+        {
+            IActionResult result;
+
+            try
+            {
+                await _authService.SetPasswordAsync(dto);
                 result = Ok<object>(MessagesConstants.PasswordSetSuccess, default);
             }
             catch (Exception ex)

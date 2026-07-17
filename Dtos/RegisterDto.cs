@@ -18,8 +18,6 @@ namespace MyAssignment.Dtos
         [EmailAddress]
         public string Email { get; set; } = string.Empty;
 
-        [Required]
-        public string Password { get; set; } = string.Empty;
 
         [Required]
         [RegularExpression(@"^03\d{9}$", ErrorMessage = "Invalid phone number format.")]
