@@ -39,6 +39,6 @@ namespace MyAssignment.Services.Users
         /// <summary>
         /// Retrieves a paged, searchable, sortable list of users.
         /// </summary>
-        Task<PagedResult<UserResponseDto>> GetUsersPagedAsync(Dictionary<string, string> queryParams);
+        Task<PagedResult<UserResponseDto>> GetUsersPagedAsync(QueryParameters queryParams);
     }
 }

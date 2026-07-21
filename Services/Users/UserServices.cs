@@ -80,18 +80,9 @@ namespace MyAssignment.Services.Users
             return true;
         }
 
-        public async Task<PagedResult<UserResponseDto>> GetUsersPagedAsync(Dictionary<string, string> queryParams)
+        public async Task<PagedResult<UserResponseDto>> GetUsersPagedAsync(QueryParameters queryParams)
         {
-            (List<User> items, int totalCount) = await _userRepository.GetPagedDynamicAsync(queryParams);
-
-            int page = 1;
-            int pageSize = 10;
-            
-            StringComparer comparer = StringComparer.OrdinalIgnoreCase;
-            Dictionary<string, string> caseInsensitiveParams = new Dictionary<string, string>(queryParams, comparer);
-
-            if (caseInsensitiveParams.TryGetValue(QueryConstants.Page, out string? pStr) && int.TryParse(pStr, out int p)) page = p;
-            if (caseInsensitiveParams.TryGetValue(QueryConstants.PageSize, out string? psStr) && int.TryParse(psStr, out int ps)) pageSize = ps;
+            (List<User> items, int totalCount, int page, int pageSize) = await _userRepository.GetPagedAsync(queryParams);
 
             List<UserResponseDto> dtos = _mapper.Map<List<UserResponseDto>>(items);
 

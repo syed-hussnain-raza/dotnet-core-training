@@ -37,9 +37,18 @@ namespace MyAssignment.Controllers
         /// Retrieves a paged, searchable, sortable list of users.
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetAllUsers()
+        public async Task<IActionResult> GetAllUsers([FromQuery] QueryParameters parameters)
         {
-            Dictionary<string, string> parameters = Request.Query.ToDictionary(q => q.Key, q => q.Value.ToString());
+            // Populate the CustomFilters manually from the request
+            string[] knownKeys = { "page", "pagesize", "searchterm", "sortby", "sortdescending" };
+            foreach (var key in Request.Query.Keys)
+            {
+                if (!knownKeys.Contains(key.ToLower()))
+                {
+                    parameters.Filters.Add(key, Request.Query[key].ToString());
+                }
+            }
+
             IActionResult result;
 
             try

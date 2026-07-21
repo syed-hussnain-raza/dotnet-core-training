@@ -34,16 +34,15 @@ namespace MyAssignment.Services.Auth
 
         public async Task RegisterAsync(RegisterDto dto)
         {
-            IdentityResult identityResult = await CreateIdentityUserAsync(dto);
+            User user = _mapper.Map<User>(dto);
+            user.UserName = UsernameGenerator.Generate(dto.FirstName, dto.LastName);
+
+            IdentityResult identityResult = await _userManager.CreateAsync(user);
 
             if (identityResult.Succeeded)
             {
-                User? user = await _userManager.FindByEmailAsync(dto.Email);
-                if (user != null)
-                {
-                    string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    await _emailService.SendConfirmationEmailAsync(user, token);
-                }
+                string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                await _emailService.SendConfirmationEmailAsync(user, token);
             }
             else
             {
@@ -58,13 +57,6 @@ namespace MyAssignment.Services.Auth
             if (user == null)
             {
                 throw new Exception(MessagesConstants.UserNotFound);
-            }
-
-            bool alreadyHasPassword = await _userManager.HasPasswordAsync(user);
-
-            if (alreadyHasPassword)
-            {
-                throw new Exception(MessagesConstants.AlreadyHasPassword);
             }
 
             IdentityResult confirmResult = await _userManager.ConfirmEmailAsync(user, dto.Token);
@@ -90,14 +82,7 @@ namespace MyAssignment.Services.Auth
                 throw new Exception(MessagesConstants.UserNotFound);
             }
 
-            bool alreadyHasPassword = await _userManager.HasPasswordAsync(user);
-
-            if (alreadyHasPassword)
-            {
-                throw new Exception(MessagesConstants.AlreadyHasPassword);
-            }
-
-            // Since user has no password yet, ResetPasswordAsync is the secure way to use the reset token to set the first password
+            // ResetPasswordAsync securely validates the reset token and sets/updates the password
             IdentityResult passwordResult = await _userManager.ResetPasswordAsync(user, dto.Token, dto.NewPassword);
 
             if (!passwordResult.Succeeded)
@@ -138,19 +123,6 @@ namespace MyAssignment.Services.Auth
         }
 
         // Private Helper Methods
-
-        private async Task<IdentityResult> CreateIdentityUserAsync(RegisterDto dto)
-        {
-            User user = _mapper.Map<User>(dto);
-            user.UserName = UsernameGenerator.Generate(dto.FirstName, dto.LastName);
-
-            // no password argument — account starts passwordless until confirmed
-            IdentityResult identityResult = await _userManager.CreateAsync(user);
-            return identityResult;
-        }
-
-
-
 
         /// <summary>
         /// Fetches the user's assigned roles and generates a signed JWT
