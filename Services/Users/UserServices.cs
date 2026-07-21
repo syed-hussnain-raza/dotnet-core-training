@@ -90,8 +90,8 @@ namespace MyAssignment.Services.Users
             StringComparer comparer = StringComparer.OrdinalIgnoreCase;
             Dictionary<string, string> caseInsensitiveParams = new Dictionary<string, string>(queryParams, comparer);
 
-            if (caseInsensitiveParams.TryGetValue("page", out string? pStr) && int.TryParse(pStr, out int p)) page = p;
-            if (caseInsensitiveParams.TryGetValue("pageSize", out string? psStr) && int.TryParse(psStr, out int ps)) pageSize = ps;
+            if (caseInsensitiveParams.TryGetValue(QueryConstants.Page, out string? pStr) && int.TryParse(pStr, out int p)) page = p;
+            if (caseInsensitiveParams.TryGetValue(QueryConstants.PageSize, out string? psStr) && int.TryParse(psStr, out int ps)) pageSize = ps;
 
             List<UserResponseDto> dtos = _mapper.Map<List<UserResponseDto>>(items);
 
