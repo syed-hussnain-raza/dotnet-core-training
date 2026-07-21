@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 using MimeKit;
 using MyAssignment.Options;
 
-namespace MyAssignment.Services
+namespace MyAssignment.Services.Email
 {
     /// <summary>
     /// Sends emails via SMTP (MailKit), using connection details appsettings.json; 

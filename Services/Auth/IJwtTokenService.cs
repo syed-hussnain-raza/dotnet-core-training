@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace MyAssignment.Services
+namespace MyAssignment.Services.Auth
 {
 	/// <summary>
 	/// Defines JWT token generation for authenticated Identity users.

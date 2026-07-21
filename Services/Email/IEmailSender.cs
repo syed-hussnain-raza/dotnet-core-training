@@ -1,4 +1,4 @@
-namespace MyAssignment.Services
+namespace MyAssignment.Services.Email
 {
     /// <summary>
     /// Sends transactional emails (e.g. account confirmation links).

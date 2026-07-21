@@ -1,6 +1,6 @@
 using MyAssignment.Dtos;
 
-namespace MyAssignment.Services
+namespace MyAssignment.Services.Auth
 {
     /// <summary>
     /// Defines business operations for account registration, email

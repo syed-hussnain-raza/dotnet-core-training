@@ -2,7 +2,7 @@ using MyAssignment.Models;
 using MyAssignment.Dtos;
 using MyAssignment.Helper;
 
-namespace MyAssignment.Services
+namespace MyAssignment.Services.Users
 {
     /// <summary>
     /// Defines business operations for managing users.
@@ -39,6 +39,6 @@ namespace MyAssignment.Services
         /// <summary>
         /// Retrieves a paged, searchable, sortable list of users.
         /// </summary>
-        Task<PagedResult<UserResponseDto>> GetUsersPagedAsync(QueryParameters parameters);
+        Task<PagedResult<UserResponseDto>> GetUsersPagedAsync(Dictionary<string, string> queryParams);
     }
 }

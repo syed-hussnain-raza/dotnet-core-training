@@ -6,8 +6,9 @@ using MyAssignment.Dtos;
 using AutoMapper;
 using MyAssignment.Helper;
 using MyAssignment.Models;
+using MyAssignment.Services.Email;
 
-namespace MyAssignment.Services
+namespace MyAssignment.Services.Auth
 {
     /// <summary>
     /// Provides business logic for registration, email confirmation, and login.
@@ -16,21 +17,18 @@ namespace MyAssignment.Services
     {
         private readonly UserManager<User> _userManager;
         private readonly IJwtTokenService _jwtTokenService;
-        private readonly IEmailSender _emailSender;
-        private readonly IOptions<FrontendSettings> _frontendSettings;
+        private readonly IEmailService _emailService;
         private readonly IMapper _mapper;
 
         public AuthService(
             UserManager<User> userManager,
             IJwtTokenService jwtTokenService,
-            IEmailSender emailSender,
-            IOptions<FrontendSettings> frontendSettings,
+            IEmailService emailService,
             IMapper mapper)
         {
             _userManager = userManager;
             _jwtTokenService = jwtTokenService;
-            _emailSender = emailSender;
-            _frontendSettings = frontendSettings;
+            _emailService = emailService;
             _mapper = mapper;
         }
 
@@ -40,7 +38,12 @@ namespace MyAssignment.Services
 
             if (identityResult.Succeeded)
             {
-                await SendConfirmationEmailAsync(dto.Email);
+                User? user = await _userManager.FindByEmailAsync(dto.Email);
+                if (user != null)
+                {
+                    string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    await _emailService.SendConfirmationEmailAsync(user, token);
+                }
             }
             else
             {
@@ -75,10 +78,7 @@ namespace MyAssignment.Services
             string resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
 
             // Send an email with the link to set the password
-            string setPasswordLink = $"{_frontendSettings.Value.SetPasswordUrl}?userId={Uri.EscapeDataString(user.Id)}&token={Uri.EscapeDataString(resetToken)}";
-            string body = EmailTemplates.GetSetPasswordEmailTemplate(setPasswordLink);
-
-            await _emailSender.SendEmailAsync(user.Email!, "Set your password", body);
+            await _emailService.SendPasswordSetEmailAsync(user, resetToken);
         }
 
         public async Task SetPasswordAsync(SetPasswordDto dto)
@@ -149,20 +149,7 @@ namespace MyAssignment.Services
             return identityResult;
         }
 
-        private async Task SendConfirmationEmailAsync(string email)
-        {
-            User? user = await _userManager.FindByEmailAsync(email);
 
-            if (user != null)
-            {
-                string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-
-                string confirmationLink = $"{_frontendSettings.Value.ConfirmEmailUrl}?userId={Uri.EscapeDataString(user.Id)}&token={Uri.EscapeDataString(token)}";
-                string body = EmailTemplates.GetConfirmationEmailTemplate(confirmationLink);
-
-                await _emailSender.SendEmailAsync(email, "Confirm your account", body);
-            }
-        }
 
 
         /// <summary>

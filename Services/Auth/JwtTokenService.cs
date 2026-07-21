@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MyAssignment.Options;
 
-namespace MyAssignment.Services
+namespace MyAssignment.Services.Auth
 {
     /// <summary>
     /// Generates signed JWT tokens for authenticated Identity users, reading
