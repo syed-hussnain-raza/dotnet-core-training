@@ -11,6 +11,8 @@ namespace MyAssignment.Repositories
 
         Task<T?> GetByIdAsync(object id);
 
+        Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
+
         Task AddAsync(T entity);
 
         void Remove(T entity);
@@ -29,5 +31,11 @@ namespace MyAssignment.Repositories
             int pageSize,
             Expression<Func<T, bool>>? filter = null,
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null);
+
+        /// <summary>
+        /// Retrieves a paged, optionally filtered and sorted subset of entities based on dynamic string parameters.
+        /// </summary>
+        /// <param name="queryParams">Dictionary containing pagination, sorting, and filtering options.</param>
+        Task<(List<T> Items, int TotalCount)> GetPagedDynamicAsync(Dictionary<string, string> queryParams);
     }
 }

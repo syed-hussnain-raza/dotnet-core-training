@@ -5,7 +5,9 @@ using MyAssignment.Data;
 using MyAssignment.Extensions;
 using MyAssignment.Helper;
 using MyAssignment.Repositories;
-using MyAssignment.Services;
+using MyAssignment.Services.Auth;
+using MyAssignment.Services.Email;
+using MyAssignment.Services.Users;
 using MyAssignment.Options;
 
 // load .env into process environment variables before the builder reads
@@ -33,8 +35,8 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// register the IUserRepository interface and its implementation UserRepository for dependency injection
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+// register the open generic repository interface and its implementation for dependency injection
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 // register the email sender used for account confirmation emails
 builder.Services.AddEmailSender();
@@ -66,6 +68,9 @@ builder.Services.AddScoped<IUserService, UserService>();
 
 // register the IAuthService interface and its implementation AuthService for dependency injection
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+// register the IEmailService interface and its implementation EmailService for dependency injection
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // register the JWT token generation service for dependency injection
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();

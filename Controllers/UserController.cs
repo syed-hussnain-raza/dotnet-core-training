@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MyAssignment.Models;
 using MyAssignment.Dtos;
-using MyAssignment.Services;
+using MyAssignment.Services.Users;
 using MyAssignment.Constants;
 using MyAssignment.Helper;
 using Asp.Versioning;
@@ -37,8 +37,9 @@ namespace MyAssignment.Controllers
         /// Retrieves a paged, searchable, sortable list of users.
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetAllUsers([FromQuery] QueryParameters parameters)
+        public async Task<IActionResult> GetAllUsers()
         {
+            Dictionary<string, string> parameters = Request.Query.ToDictionary(q => q.Key, q => q.Value.ToString());
             IActionResult result;
 
             try

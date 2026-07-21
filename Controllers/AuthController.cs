@@ -2,7 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyAssignment.Constants;
 using MyAssignment.Dtos;
-using MyAssignment.Services;
+using MyAssignment.Services.Auth;
+using MyAssignment.Services.Users;
 using Asp.Versioning;
 using MyAssignment.Shared;
 
