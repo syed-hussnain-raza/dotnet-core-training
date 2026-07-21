@@ -1,4 +1,4 @@
-﻿using MyAssignment.Services;
+using MyAssignment.Services.Email;
 
 namespace MyAssignment.Extensions
 {

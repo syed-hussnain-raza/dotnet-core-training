@@ -34,5 +34,11 @@ namespace MyAssignment.Constants
         public const string EmailConfirmed = "Email confirmed successfully. Please check your email to set your password.";
         public const string PasswordSetSuccess = "Password set successfully. You can now log in.";
         public const string AlreadyHasPassword = "This account already has a password set.";
+        public const string EmailSubjectConfirmAccount = "Confirm your account";
+        public const string EmailSubjectSetPassword = "Set your password";
+        
+        // Email formats and logging
+        public const string HtmlFormat = "html";
+        public const string EmailSendFailedLog = "Failed to send email to {ToEmail}";
     }
 }
