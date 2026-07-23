@@ -50,7 +50,7 @@ namespace MyAssignment.Services.Auth
             }
         }
 
-        public async Task ConfirmEmailAsync(ConfirmEmailDto dto)
+        public async Task<string> ConfirmEmailAsync(ConfirmEmailDto dto)
         {
             User? user = await _userManager.FindByIdAsync(dto.UserId);
 
@@ -69,8 +69,8 @@ namespace MyAssignment.Services.Auth
             // Generate password reset token
             string resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
 
-            // Send an email with the link to set the password
-            await _emailService.SendPasswordSetEmailAsync(user, resetToken);
+            // Return the reset token to the frontend so it can route to Set Password
+            return resetToken;
         }
 
         public async Task SetPasswordAsync(SetPasswordDto dto)

@@ -3,7 +3,7 @@ using MyAssignment.Data;
 using MyAssignment.Helper;
 using System.Linq.Expressions;
 using System.Linq.Dynamic.Core;
-using System.Reflection;
+using Microsoft.EntityFrameworkCore.Metadata;
 using MyAssignment.Dtos;
 
 namespace MyAssignment.Repositories
@@ -14,16 +14,8 @@ namespace MyAssignment.Repositories
     /// </summary>
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
-        // Cache reflection data per entity type for maximum performance
-        private static readonly Dictionary<string, PropertyInfo> _entityProperties = typeof(T)
-            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-            .ToDictionary(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase);
-
-        private static readonly List<string> _stringPropertyNames = typeof(T)
-            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-            .Where(p => p.PropertyType == typeof(string) && p.CanRead)
-            .Select(p => p.Name)
-            .ToList();
+        private readonly Dictionary<string, IProperty> _entityProperties;
+        private readonly List<string> _stringPropertyNames;
 
         protected readonly AppDbContext _context;
         protected readonly DbSet<T> _dbSet;
@@ -32,38 +24,81 @@ namespace MyAssignment.Repositories
         {
             _context = context;
             _dbSet = _context.Set<T>();
+
+            var entityType = _context.Model.FindEntityType(typeof(T))!;
+            var properties = entityType.GetProperties();
+            
+            _entityProperties = properties.ToDictionary(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase);
+            
+            _stringPropertyNames = properties
+                .Where(p => p.ClrType == typeof(string))
+                .Select(p => p.Name)
+                .ToList();
         }
 
+        /// <summary>
+        /// Retrieves all entities of type T from the database without tracking.
+        /// </summary>
+        /// <returns></returns>
         public async Task<List<T>> GetAllAsync()
         {
             return await _dbSet.AsNoTracking().ToListAsync();
         }
 
+        /// <summary>
+        /// Retrieves an entity of type T by its primary key. Returns null if not found.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<T?> GetByIdAsync(object id)
         {
             return await _dbSet.FindAsync(id);
         }
 
+        /// <summary>
+        /// Retrieves the first entity of type T that matches the given predicate. Returns null if none found.
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
         public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
         {
             return await _dbSet.FirstOrDefaultAsync(predicate);
         }
 
+        /// <summary>
+        /// Adds a new entity of type T to the database context.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
         public async Task AddAsync(T entity)
         {
             await _dbSet.AddAsync(entity);
         }
 
+        /// <summary>
+        /// Removes an existing entity of type T from the database context.
+        /// </summary>
+        /// <param name="entity"></param>
         public void Remove(T entity)
         {
             _dbSet.Remove(entity);
         }
 
+        /// <summary>
+        /// Saves all changes made in the context to the database asynchronously.
+        /// </summary>
+        /// <returns></returns>
         public async Task<int> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Retrieves a paginated list of entities of type T based on the provided query parameters,
+        /// including dynamic searching, filtering, and sorting.
+        /// </summary>
+        /// <param name="queryParams"></param>
+        /// <returns></returns>
         public async Task<(List<T> Items, int TotalCount, int Page, int PageSize)> GetPagedAsync(QueryParameters queryParams)
         {
             IQueryable<T> query = _dbSet.AsNoTracking().AsQueryable();
@@ -82,6 +117,12 @@ namespace MyAssignment.Repositories
 
         // Private Helper Methods to simplify dynamic logic 
 
+        /// <summary>
+        /// Applies a global search across all string properties of the entity type T using the provided search term.
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="searchTerm"></param>
+        /// <returns></returns>
         private IQueryable<T> ApplyGlobalSearch(IQueryable<T> query, string? searchTerm)
         {
             if (string.IsNullOrWhiteSpace(searchTerm) || !_stringPropertyNames.Any()) 
@@ -92,46 +133,63 @@ namespace MyAssignment.Repositories
             return query.Where(searchConditions, searchTerm);
         }
 
+        /// <summary>
+        /// Applies column-specific filters to the query based on the provided dictionary of filters.
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="filters"></param>
+        /// <returns></returns>
         private IQueryable<T> ApplyColumnFilters(IQueryable<T> query, Dictionary<string, string> filters)
         {
             if (filters == null || !filters.Any()) return query;
 
-            foreach (KeyValuePair<string, string> filter in filters)
+            foreach (var filter in filters)
             {
-                if (_entityProperties.TryGetValue(filter.Key, out PropertyInfo? prop))
+                // If column doesn't exist, skip it.
+                if (!_entityProperties.TryGetValue(filter.Key, out IProperty? prop))
+                    continue;
+
+                try 
                 {
-                    if (prop.PropertyType == typeof(string))
+                    // Text Search (Partial Match)
+                    if (prop.ClrType == typeof(string))
                     {
-                        // Partial match for strings
                         query = query.Where($"{prop.Name}.Contains(@0)", filter.Value);
                     }
+                    // Exact Match (Numbers, Dates, Booleans)
                     else
                     {
-                        // Exact match for numbers, booleans, etc.
-                        try 
-                        {
-                            Type targetType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
-                            object? typedValue = Convert.ChangeType(filter.Value, targetType);
-                            query = query.Where($"{prop.Name} == @0", typedValue);
-                        }
-                        catch { /* Ignore invalid formats */ }
+                        // Convert the string into an number
+                        Type targetType = Nullable.GetUnderlyingType(prop.ClrType) ?? prop.ClrType;
+                        object convertedValue = Convert.ChangeType(filter.Value, targetType);
+                        
+                        query = query.Where($"{prop.Name} == @0", convertedValue);
                     }
                 }
+                // Ignore it, if filter value not valid.
+                catch { }
             }
 
             return query;
         }
 
+        /// <summary>
+        /// Applies sorting to the query based on the provided sortBy property and sortDescending flag.
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="sortBy"></param>
+        /// <param name="sortDescending"></param>
+        /// <returns></returns>
         private IQueryable<T> ApplySorting(IQueryable<T> query, string? sortBy, bool sortDescending)
         {
-            if (!string.IsNullOrWhiteSpace(sortBy) && _entityProperties.TryGetValue(sortBy, out PropertyInfo? sortProp))
+            if (!string.IsNullOrWhiteSpace(sortBy) && _entityProperties.TryGetValue(sortBy, out IProperty? sortProp))
             {
                 string sortDirection = sortDescending ? "descending" : "ascending";
                 return query.OrderBy($"{sortProp.Name} {sortDirection}");
             }
             
             // Fallback to sorting by 'Id' or the first property available
-            string fallbackProp = _entityProperties.ContainsKey("Id") ? "Id" : _entityProperties.Values.First().Name;
+            string fallbackProp = _entityProperties.ContainsKey("Id") ? "Id" : _entityProperties.Values.FirstOrDefault()?.Name ?? "Id";
             return query.OrderBy($"{fallbackProp} ascending");
         }
     }

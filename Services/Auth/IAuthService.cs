@@ -10,7 +10,7 @@ namespace MyAssignment.Services.Auth
     {
         Task RegisterAsync(RegisterDto dto);
 
-        Task ConfirmEmailAsync(ConfirmEmailDto dto);
+        Task<string> ConfirmEmailAsync(ConfirmEmailDto dto);
 
         Task SetPasswordAsync(SetPasswordDto dto);
 

@@ -51,7 +51,7 @@ namespace MyAssignment.Controllers
         }
 
         /// <summary>
-        /// Confirms the user's email and sends a second email to set their password.
+        /// Confirms the user's email and returns a reset token for setting their password.
         /// </summary>
         [HttpPost(ApiRoutesConstants.ConfirmEmail)]
         public async Task<IActionResult> ConfirmEmail(ConfirmEmailDto dto)
@@ -60,8 +60,8 @@ namespace MyAssignment.Controllers
 
             try
             {
-                await _authService.ConfirmEmailAsync(dto);
-                result = Ok<object>(MessagesConstants.EmailConfirmed, default);
+                string resetToken = await _authService.ConfirmEmailAsync(dto);
+                result = Ok(MessagesConstants.EmailConfirmed, new { Token = resetToken });
             }
             catch (Exception ex)
             {

@@ -38,15 +38,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // register the open generic repository interface and its implementation for dependency injection
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
-// register the email sender used for account confirmation emails
-builder.Services.AddEmailSender();
+// Register application services (Email, Identity, JWT, Swagger)
+builder.Services.AddApplicationServices(builder.Configuration);
 
-// Identity (login/credentials) and JWT bearer authentication
-builder.Services.AddIdentityConfiguration();
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
-builder.Services.Configure<FrontendSettings>(builder.Configuration.GetSection(FrontendSettings.SectionName));
-builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection(SmtpSettings.SectionName));
-builder.Services.AddJwtAuthentication(builder.Configuration);
+// Configuration Settings
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(nameof(JwtSettings)));
+builder.Services.Configure<UrlSettings>(builder.Configuration.GetSection(nameof(UrlSettings)));
+builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection(nameof(SmtpSettings)));
 
 // fallback authorization policy: every endpoint requires an authenticated
 // user by default, unless explicitly marked [AllowAnonymous]
@@ -56,9 +54,6 @@ builder.Services.AddAuthorization(options =>
         .RequireAuthenticatedUser()
         .Build();
 });
-
-// Swagger, with JWT bearer support in the UI
-builder.Services.AddSwaggerWithJwtSupport();
 
 // AutoMapper registration for mapping between models and DTOs
 builder.Services.AddAutoMapper(typeof(MappingProfile));

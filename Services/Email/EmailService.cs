@@ -12,32 +12,22 @@ namespace MyAssignment.Services.Email
     public class EmailService : IEmailService
     {
         private readonly IEmailSender _emailSender;
-        private readonly IOptions<FrontendSettings> _frontendSettings;
+        private readonly IOptions<UrlSettings> _urlSettings;
 
-        public EmailService(IEmailSender emailSender, IOptions<FrontendSettings> frontendSettings)
+        public EmailService(IEmailSender emailSender, IOptions<UrlSettings> urlSettings)
         {
             _emailSender = emailSender;
-            _frontendSettings = frontendSettings;
+            _urlSettings = urlSettings;
         }
 
         public async Task SendConfirmationEmailAsync(User user, string emailConfirmationToken)
         {
             if (user.Email == null) return;
 
-            string confirmationLink = $"{_frontendSettings.Value.ConfirmEmailUrl}?userId={Uri.EscapeDataString(user.Id)}&token={Uri.EscapeDataString(emailConfirmationToken)}";
+            string confirmationLink = $"{_urlSettings.Value.ConfirmEmailUrl}?userId={Uri.EscapeDataString(user.Id)}&token={Uri.EscapeDataString(emailConfirmationToken)}";
             string body = EmailTemplates.GetConfirmationEmailTemplate(confirmationLink);
 
             await _emailSender.SendEmailAsync(user.Email, MessagesConstants.EmailSubjectConfirmAccount, body);
-        }
-
-        public async Task SendPasswordSetEmailAsync(User user, string passwordResetToken)
-        {
-            if (user.Email == null) return;
-
-            string setPasswordLink = $"{_frontendSettings.Value.SetPasswordUrl}?userId={Uri.EscapeDataString(user.Id)}&token={Uri.EscapeDataString(passwordResetToken)}";
-            string body = EmailTemplates.GetSetPasswordEmailTemplate(setPasswordLink);
-
-            await _emailSender.SendEmailAsync(user.Email, MessagesConstants.EmailSubjectSetPassword, body);
         }
     }
 }

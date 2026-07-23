@@ -8,6 +8,5 @@ namespace MyAssignment.Services.Email
     public interface IEmailService
     {
         Task SendConfirmationEmailAsync(User user, string emailConfirmationToken);
-        Task SendPasswordSetEmailAsync(User user, string passwordResetToken);
     }
 }
