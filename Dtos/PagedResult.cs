@@ -1,4 +1,4 @@
-﻿namespace MyAssignment.Helper
+namespace MyAssignment.Dtos
 {
     /// <summary>
     /// Wraps a page of items alongside pagination metadata.

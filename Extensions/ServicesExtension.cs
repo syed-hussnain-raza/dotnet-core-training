@@ -1,24 +1,48 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using MyAssignment.Data;
+using MyAssignment.Helper;
 using MyAssignment.Options;
+using MyAssignment.Repositories;
+using MyAssignment.Services.Auth;
 using MyAssignment.Services.Email;
-using System.Linq.Expressions;
+using MyAssignment.Services.Users;
 using System.Text;
 
 namespace MyAssignment.Extensions
 {
     public static class ServicesExtension
     {
-        public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
-        {
-            // Email Service
-            services.AddScoped<IEmailSender, SmtpEmailSender>();
+        private const string AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+ ";
 
-            // Identity Configuration
+        /// <summary>
+        /// Registers all scoped application business services, generic repositories, and mapper profiles.
+        /// </summary>
+        public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+        {
+            services.AddAutoMapper(typeof(MappingProfile));
+
+            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IEmailSender, SmtpEmailSender>();
+            services.AddScoped<IJwtTokenService, JwtTokenService>();
+
+            return services;
+        }
+
+        /// <summary>
+        /// Registers ASP.NET Core Identity authentication schemes and password policies.
+        /// </summary>
+        public static IServiceCollection AddAppIdentity(this IServiceCollection services)
+        {
             services.AddIdentity<Models.User, IdentityRole>(options =>
             {
                 options.Password.RequiredLength = 6;
@@ -26,12 +50,19 @@ namespace MyAssignment.Extensions
                 options.Password.RequireUppercase = false;
 
                 // Now, this allow spaces in usernames
-                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+ ";
+                options.User.AllowedUserNameCharacters = AllowedUserNameCharacters;
             })
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
 
-            // JWT Authentication
+            return services;
+        }
+
+        /// <summary>
+        /// Registers JWT token authentication middleware and validation parameters.
+        /// </summary>
+        public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+        {
             var jwtSettings = new JwtSettings();
             configuration.GetSection(nameof(JwtSettings)).Bind(jwtSettings);
 
@@ -54,7 +85,14 @@ namespace MyAssignment.Extensions
                 };
             });
 
-            // Swagger with JWT Support
+            return services;
+        }
+
+        /// <summary>
+        /// Registers OpenAPI and Swagger definition schemas with JWT authorization support.
+        /// </summary>
+        public static IServiceCollection AddSwaggerWithJwt(this IServiceCollection services)
+        {
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(options =>
             {
@@ -78,38 +116,72 @@ namespace MyAssignment.Extensions
         }
 
         /// <summary>
-        /// Applies optional filtering and ordering to a query, then returns a paginated result
-        /// along with the total number of matching records.
+        /// Registers MVC controllers with global model state validation filter and suppresses default invalid model state responses.
         /// </summary>
-        /// <typeparam name="T">The type of the elements in the query.</typeparam>
-        /// <param name="query">The source query to paginate.</param>
-        /// <param name="page">The 1-based page number to retrieve.</param>
-        /// <param name="pageSize">The number of items to include in each page.</param>
-        /// <param name="filter">An optional filter expression applied before counting and pagination.</param>
-        /// <param name="orderBy">An optional ordering function applied before pagination.</param>
-        /// <returns></returns>
-        public static async Task<(List<T> Items, int TotalCount)> ToPagedResultAsync<T>(
-            this IQueryable<T> query,
-            int page,
-            int pageSize,
-            Expression<Func<T, bool>>? filter = null,
-            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null)
+        public static IServiceCollection AddControllersWithFilters(this IServiceCollection services)
         {
-            if (filter != null)
+            services.AddControllers(options =>
             {
-                query = query.Where(filter);
-            }
+                options.Filters.Add<ValidateModelStateFilter>();
+            });
 
-            int totalCount = await query.CountAsync();
-
-            if (orderBy != null)
+            services.Configure<ApiBehaviorOptions>(options =>
             {
-                query = orderBy(query);
-            }
+                options.SuppressModelStateInvalidFilter = true;
+            });
 
-            var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            return services;
+        }
 
-            return (items, totalCount);
+        /// <summary>
+        /// Registers SQL Server database context via dependency injection using the connection string from configuration.
+        /// </summary>
+        public static IServiceCollection AddDatabaseContext(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+
+            return services;
+        }
+
+        /// <summary>
+        /// Registers strongly-typed options sections from application configuration.
+        /// </summary>
+        public static IServiceCollection AddApplicationOptions(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<JwtSettings>(configuration.GetSection(nameof(JwtSettings)));
+            services.Configure<UrlSettings>(configuration.GetSection(nameof(UrlSettings)));
+            services.Configure<SmtpSettings>(configuration.GetSection(nameof(SmtpSettings)));
+
+            return services;
+        }
+
+        /// <summary>
+        /// Registers global fallback authorization policies requiring authenticated users by default.
+        /// </summary>
+        public static IServiceCollection AddAuthorizationPolicies(this IServiceCollection services)
+        {
+            services.AddAuthorization(options =>
+            {
+                options.FallbackPolicy = new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .Build();
+            });
+
+            return services;
+        }
+
+        /// <summary>
+        /// Registers API versioning reporting and MVC integration.
+        /// </summary>
+        public static IServiceCollection AddApiVersioningConfiguration(this IServiceCollection services)
+        {
+            services.AddApiVersioning(options =>
+            {
+                options.ReportApiVersions = true;
+            }).AddMvc();
+
+            return services;
         }
     }
 }

@@ -102,7 +102,7 @@ namespace MyAssignment.Services.Auth
 
             if (!user.EmailConfirmed)
             {
-                throw new Exception(MessagesConstants.InvalidCredentials);
+                throw new Exception(MessagesConstants.EmailNotConfirmed);
             }
 
             bool passwordValid = await _userManager.CheckPasswordAsync(user, dto.Password);
