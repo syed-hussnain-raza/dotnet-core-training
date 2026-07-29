@@ -16,6 +16,9 @@ namespace MyAssignment.Helper
 
             // Tell AutoMapper: UserDto <-> User
             CreateMap<UserDto, User>().ReverseMap();
+
+            // Tell AutoMapper: User -> UserResponseDto
+            CreateMap<User, UserResponseDto>();
         }
     }
 }

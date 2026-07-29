@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using MyAssignment.Models;
 using MyAssignment.Dtos;
-using MyAssignment.Services;
+using MyAssignment.Services.Users;
 using MyAssignment.Constants;
+using MyAssignment.Helper;
 using Asp.Versioning;
 using MyAssignment.Shared;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MyAssignment.Controllers
 {
@@ -14,35 +16,36 @@ namespace MyAssignment.Controllers
     [ApiController]
     [ApiVersion(ApiVersionsConstants.V1)]
     [Route(ApiRoutesConstants.Users)]
+    [Authorize]
     public class UserController : BaseApiController
     {
         /// <summary>
-        /// Service responsible for user business logic and data management.
+        /// Service responsible for user business logic.
         /// </summary>
         private readonly IUserService _userService;
 
         /// <summary>
-        /// Creates a new UserController with the given IUserService injected.
+        /// Initializes a new instance of the <see cref="UserController"/> class with the specified user service.
         /// </summary>
-        /// <param name="userService">Service handling user business logic.</param>
+        /// <param name="userService"></param>
         public UserController(IUserService userService)
         {
             _userService = userService;
         }
 
         /// <summary>
-        /// Retrieves all users.
+        /// Retrieves a paged, searchable, sortable list of users.
         /// </summary>
-        /// <returns>200 OK with the list of users.</returns>
-        [HttpGet]
-        public async Task<IActionResult> GetAllUsers()
+        [HttpPost(ApiRoutesConstants.Search)]
+        public async Task<IActionResult> GetAllUsers([FromBody] QueryParameters parameters)
         {
+
             IActionResult result;
 
             try
             {
-                List<User> users = await _userService.GetAllUsersAsync();
-                result = Ok(MessagesConstants.UsersFetched, users);
+                PagedResult<UserResponseDto> pagedUsers = await _userService.GetUsersPagedAsync(parameters);
+                result = Ok(MessagesConstants.UsersFetched, pagedUsers);
             }
             catch (Exception ex)
             {
@@ -64,7 +67,7 @@ namespace MyAssignment.Controllers
 
             try
             {
-                User user = await _userService.GetUserByIdAsync(id);
+                UserResponseDto user = await _userService.GetUserByIdAsync(id);
                 result = Ok(MessagesConstants.UserFetched, user);
             }
             catch (Exception ex)
@@ -87,7 +90,7 @@ namespace MyAssignment.Controllers
 
             try
             {
-                User user = await _userService.CreateUserAsync(dto);
+                UserResponseDto user = await _userService.CreateUserAsync(dto);
                 result = Ok(MessagesConstants.UserCreated, user);
             }
             catch (Exception ex)
@@ -134,7 +137,7 @@ namespace MyAssignment.Controllers
 
             try
             {
-                User user = await _userService.UpdateUserAsync(id, dto);
+                UserResponseDto user = await _userService.UpdateUserAsync(id, dto);
                 result = Ok(MessagesConstants.UserUpdated, user);
             }
             catch (Exception ex)

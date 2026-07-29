@@ -2,14 +2,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyAssignment.Constants;
 using MyAssignment.Dtos;
-using MyAssignment.Services;
+using MyAssignment.Services.Auth;
+using MyAssignment.Services.Users;
 using Asp.Versioning;
 using MyAssignment.Shared;
 
 namespace MyAssignment.Controllers
 {
     /// <summary>
-        /// Controller for handling user authentication, including registration and login.
+    /// Handles registration, email confirmation, and login.
     /// </summary>
     [ApiController]
     [ApiVersion(ApiVersionsConstants.V1)]
@@ -18,10 +19,6 @@ namespace MyAssignment.Controllers
     {
         private readonly IAuthService _authService;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AuthController"/> class.
-        /// </summary>
-        /// <param name="authService"></param>
         public AuthController(IAuthService authService)
         {
             _authService = authService;
@@ -54,8 +51,47 @@ namespace MyAssignment.Controllers
         }
 
         /// <summary>
-        /// Authenticates a user and issues a JWT on success.
+        /// Confirms the user's email and returns a reset token for setting their password.
         /// </summary>
+        [HttpPost(ApiRoutesConstants.ConfirmEmail)]
+        public async Task<IActionResult> ConfirmEmail(ConfirmEmailDto dto)
+        {
+            IActionResult result;
+
+            try
+            {
+                string resetToken = await _authService.ConfirmEmailAsync(dto);
+                result = Ok(MessagesConstants.EmailConfirmed, new { Token = resetToken });
+            }
+            catch (Exception ex)
+            {
+                result = BadRequest(ex.Message);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Sets the user's first password using the reset token.
+        /// </summary>
+        [HttpPost(ApiRoutesConstants.SetPassword)]
+        public async Task<IActionResult> SetPassword(SetPasswordDto dto)
+        {
+            IActionResult result;
+
+            try
+            {
+                await _authService.SetPasswordAsync(dto);
+                result = Ok<object>(MessagesConstants.PasswordSetSuccess, default);
+            }
+            catch (Exception ex)
+            {
+                result = BadRequest(ex.Message);
+            }
+
+            return result;
+        }
+
         /// <param name="dto">Login credentials.</param>
         /// <returns>200 OK with a JWT if valid; otherwise 400 Bad Request.</returns>
         [HttpPost(ApiRoutesConstants.Login)]

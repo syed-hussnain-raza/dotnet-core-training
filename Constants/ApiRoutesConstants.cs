@@ -11,5 +11,9 @@ namespace MyAssignment.Constants
 
         public const string Register = "register";
         public const string Login = "login";
+        public const string ConfirmEmail = "confirm-email";
+        public const string SetPassword = "set-password";
+        public const string Search = "search";
+
     }
 }
