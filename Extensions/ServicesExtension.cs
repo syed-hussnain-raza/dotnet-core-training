@@ -31,9 +31,9 @@ namespace MyAssignment.Extensions
 
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IAuthService, AuthService>();
-            services.AddScoped<IEmailService, EmailService>();
-            services.AddScoped<IEmailSender, SmtpEmailSender>();
-            services.AddScoped<IJwtTokenService, JwtTokenService>();
+            services.AddSingleton<IEmailService, EmailService>();
+            services.AddSingleton<IEmailSender, SmtpEmailSender>();
+            services.AddSingleton<IJwtTokenService, JwtTokenService>();
 
             return services;
         }

@@ -9,29 +9,39 @@ using MyAssignment.Options;
 namespace MyAssignment.Services.Auth
 {
     /// <summary>
-    /// Generates signed JWT tokens for authenticated Identity users, reading
-    /// signing parameters from configuration (appsettings.json "Jwt" section).
+    /// Generates signed JWT tokens for authenticated Identity users using the
+    /// configured JWT settings.
     /// </summary>
     public class JwtTokenService : IJwtTokenService
     {
         private readonly JwtSettings _jwtSettings;
+        private readonly SigningCredentials _credentials;
+
+        private static readonly JwtSecurityTokenHandler TokenHandler = new();
 
         public JwtTokenService(IOptions<JwtSettings> jwtOptions)
         {
             _jwtSettings = jwtOptions.Value;
+
+            SymmetricSecurityKey signingKey =
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
+
+            _credentials = new SigningCredentials(
+                signingKey,
+                SecurityAlgorithms.HmacSha256);
         }
 
         /// <summary>
-        /// Builds a JWT containing the user's id, email, a unique token
-        /// identifier (jti), and one claim per assigned role.
+        /// Builds a JWT containing the user's identifier, email, unique token
+        /// identifier (JTI), and assigned role claims.
         /// </summary>
         public string GenerateToken(Models.User user, IList<string> roles)
         {
-            List<Claim> claims = new List<Claim>
+            List<Claim> claims = new()
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new(JwtRegisteredClaimNames.Sub, user.Id),
+                new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
             foreach (string role in roles)
@@ -39,18 +49,14 @@ namespace MyAssignment.Services.Auth
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
 
-            SymmetricSecurityKey signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
-            SigningCredentials credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
-
-            JwtSecurityToken token = new JwtSecurityToken(
+            JwtSecurityToken token = new(
                 issuer: _jwtSettings.Issuer,
                 audience: _jwtSettings.Audience,
                 claims: claims,
                 expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
-                signingCredentials: credentials);
-            
-            // return token string
-            return new JwtSecurityTokenHandler().WriteToken(token);
+                signingCredentials: _credentials);
+
+            return TokenHandler.WriteToken(token);
         }
     }
 }
